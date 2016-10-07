@@ -1,0 +1,28 @@
+const short <animation_name>_<frame_id> [4][8][8] = {         / 4 FRAMES JE 8 x 8 GROSS
+                                                    {0,0,0,0,0,0,0,0},
+                                                    {0,0,0,0,0,0,0,0},
+                                                    {0,0,0,0,0,0,0,0},
+                                                    {0,0,0,0,0,0,0,0},
+                                                    {0,0,0,0,0,0,0,0},
+                                                    {0,0,0,0,0,0,0,0},
+
+                                                                }
+
+
+
+struct color_desc{
+  char color_id = 0;
+  char color_r = 0;
+  char color_g = 0;
+  char color_b = 0;
+
+};
+
+
+struct animation_desc{
+char animation_id;
+short** pointer_array_to_given_const_shorts
+short anmount_frames
+
+
+};
