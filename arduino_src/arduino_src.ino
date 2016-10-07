@@ -5,6 +5,13 @@
  *
  */
 
+
+
+
+    
+#ifdef NO_LIB_INSTALLED
+
+
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
@@ -141,4 +148,8 @@ unsigned long currentMillis = millis();
   
  delay(500);
 }
+
+
+#endif
+
 
