@@ -24,6 +24,19 @@
 
 #define COUNT_OF_LAYERS 4
 
+//ANCHOR IST UP-LEFT IN THE VISIBLE AREA
+#define ANCHOR_X 1*8
+#define ANCHOR_Y 1*8
+
+struct ANCHOR{
+  int x;
+  int y;
+  ANCHOR(int _x, int _y){
+    x = _x;
+    y = _y;
+    }
+  };
+
 struct COLOR_DESC{
   char r;
   char g;
@@ -44,11 +57,13 @@ COLOR_DESC output_layer[FRAME_SIZE_WIDTH][FRAME_SIZE_HEIGHT]; //the final layer 
 const COLOR_DESC clear_color = COLOR_DESC(0,0,0);
 /*
  * add funktion that renders the final layer
- * 
- *
+ * auf jeden layer kann ich eine animation legen
+ * array für den anchro anlegen
+ * in der merge den anchor der layer beachten nur die stellen die sich überlappen mergen ausrechnen...
  * add farbpalette in excel eine 16stufen farbpalette bauen und hier einfügen
  * add funktion farbid to rgb
  * add funktion find neard farb id by rgb
+ * beim start alle layer anchors auf 0 setzten
  */
 //TODO IMPLEMENT OPERATOR
 bool check_equal_color(COLOR_DESC _c1, COLOR_DESC _c2){
