@@ -64,6 +64,8 @@ const COLOR_DESC clear_color = COLOR_DESC(0,0,0);
  * add funktion farbid to rgb
  * add funktion find neard farb id by rgb
  * beim start alle layer anchors auf 0 setzten
+ * add draw pixel and draw frame bei draw pixel auch eine pixelid lookup table erstellen
+ * add an additional layer for the output and compare it with the new layer only draw on change enable it with define
  */
 //TODO IMPLEMENT OPERATOR
 bool check_equal_color(COLOR_DESC _c1, COLOR_DESC _c2){
