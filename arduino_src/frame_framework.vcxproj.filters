@@ -15,11 +15,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="frame_framework.ino" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="__vm\.frame_framework.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="__vm\.arduino_src.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="frame_framework.ino">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
