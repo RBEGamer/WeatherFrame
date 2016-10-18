@@ -185,12 +185,64 @@ const FRM_COLOR clear_color = FRM_COLOR(0, 0, 0);
 const FRM_ANCHOR center = FRM_ANCHOR(ANCHOR_X, ANCHOR_Y);
 
 
+#ifndef FRM_ANIMATIONS
+#define FRM_ANIMATIONS
+class FRM_ANIMATION
+{
+public:
+	FRM_ANIMATION();
+	~FRM_ANIMATION();
+
+
+	void process_animation(); //if playing play animation to layer
+	void load_animation(FRM_COLOR* _dest_layer, FRM_COLOR* _frame_data, int* _frame_count);
+
+	//VARS
+	int current_animation_frame = 0;
+	float fade_steps = 1.0f / 50.0f;
+	float current_fade_amount = 0.0f;
+	bool fade_dir = false;
+	int anmimation_frames = 4; // count of frames
+	int next_frame_interval = 1000; //time for next frame
+	FRM_COLOR* animation_data = nullptr; //points to the FRM <animation_name>-Array
+	FRM_COLOR* destination_layer = nullptr;
+	bool animation_playing = false;
+	FRM_ANCHOR animation_anchor = FRM_ANCHOR(VISIBLE_MATRIX_WITH, VISIBLE_MATRIX_HEIGHT);
+private:
+
+};
+
+FRM_ANIMATION::FRM_ANIMATION()
+{
+}
+
+FRM_ANIMATION::~FRM_ANIMATION()
+{
+}
+
+
+
+
+
+
+
+
+#endif
+
+
+#define
 //RAIN ANIMATION
 FRM_COLOR rain[4][8][8] = {{{FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}}, {{FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)},}, {{FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}}, {{FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}}};
 const int frame_size = 4;
 unsigned long previousMillis = 0;
 const long interval = 1000; 
 int animation_state = 0;
+float fade = 0.0f;
+int loaded_animation = 0;
+bool dir = false;
+float steps = 1.0f / 50.0f;
+
+
 
 /*
   /*LED VARS*/
@@ -363,9 +415,6 @@ void  show_specific_layer(const int _id) {
 }
 
 
-float fade = 0.0f;
-int loaded_animation = 0;
-bool dir = false;
 
 
 void setup()
@@ -406,10 +455,10 @@ void loop(){
 
 
 	if (dir) {
-		fade += 0.05f;
+		fade += steps;
 	}
 	else {
-		fade -= 0.05f;
+		fade -= steps;
 	}
 	
 
