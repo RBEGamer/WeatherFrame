@@ -363,6 +363,11 @@ void  show_specific_layer(const int _id) {
 }
 
 
+float fade = 0.0f;
+int loaded_animation = 0;
+bool dir = false;
+
+
 void setup()
 {
   Serial.begin(115200);
@@ -373,27 +378,73 @@ void setup()
 
 
   /* add setup code here */
+  //LOAD FIRST ANIMATION
+  for (size_t x = 0; x < 8; x++)
+  {
+	  for (size_t y = 0; y < 8; y++)
+	  {
+		  layers[0][x + VISIBLE_MATRIX_WITH][y + VISIBLE_MATRIX_HEIGHT].set_color(rain[loaded_animation][x][y]);
+		  layers[1][x + VISIBLE_MATRIX_WITH][y + VISIBLE_MATRIX_HEIGHT].set_color(rain[loaded_animation + 1][x][y]);
+
+	  }
+  }
+  generate_output_layer();
+  show_output_layer();
+
+
+
 
 }
 
-void loop()
-
-                   for (size_t x = 0; x < 8; x++)
-        {
-          for (size_t y = 0; y < 8; y++)
-            {
-              layers[0][x+VISIBLE_MATRIX_WITH][y+VISIBLE_MATRIX_HEIGHT].set_color(rain[0][x][y]);
-              layer_intense[0] = 1.0f;
-            }
-        } 
-layers[1][8][8].set_color(255,0,0);
-layers[1][9][9].set_color(255,0,0);
-layers[1][10][10].set_color(255,0,0);
 
 
-layers[2][8][8].set_color(0,255,0);
-  generate_output_layer();
-  show_output_layer();
+
+void loop(){
+ 
+
+
+
+
+	if (dir) {
+		fade += 0.05f;
+	}
+	else {
+		fade -= 0.05f;
+	}
+	
+
+		   layer_intense[0] = 1.0f - fade;
+		   layer_intense[1] = 0.0f + fade;
+
+
+		   if ((fade >= 0.9f && dir) || (fade <= 0.1f && !dir)) {
+			   dir = !dir;
+			   
+			   loaded_animation++;
+			   if (loaded_animation > 2) {
+				   loaded_animation = 0;
+			   }
+			   clear_layer(1);
+			   clear_layer(0);
+			   for (size_t x = 0; x < 8; x++)
+			   {
+				   for (size_t y = 0; y < 8; y++)
+				   {
+					   layers[1][x + VISIBLE_MATRIX_WITH][y + VISIBLE_MATRIX_HEIGHT].set_color(rain[loaded_animation][x][y]);
+					   layers[0][x + VISIBLE_MATRIX_WITH][y + VISIBLE_MATRIX_HEIGHT].set_color(rain[loaded_animation + 1][x][y]);
+
+				   }
+			   }
+
+		   }
+
+
+		   generate_output_layer();
+		   show_output_layer();
+
+		   delay(70);
+	   
+
 
 
   
