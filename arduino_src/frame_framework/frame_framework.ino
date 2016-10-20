@@ -29,23 +29,27 @@ TODO
 
 
 //DEFINE YOUR MATRIX SIZE HERE
-#define VISIBLE_MATRIX_WITH 8 //WIDTH
-#define VISIBLE_MATRIX_HEIGHT 8 //HEIGHT
-#define LED_COUNT (VISIBLE_MATRIX_WITH*VISIBLE_MATRIX_HEIGHT) + 0
+#define VISIBLE_MATRIX_WITH 16 //WIDTH
+#define VISIBLE_MATRIX_HEIGHT 16 //HEIGHT
+
 //YOU CAN DEFINE HERE YOUR MATRIX SETUP
-#define MATRIX_ORIGIN_LEFT_UP
-#define MATRIX_MODE_ROW
-#define COUNT_OF_LAYERS 4 //SET LAYER COUNT HERE WATCH YOUR RAM
+#define MATRIX_ORIGIN_LEFT_UP // where is your origin corner MATRIX_ORIGIN_LEFT_UP MATRIX_ORIGIN_LEFT_DOWN MATRIX_ORIGIN_RIGHT_UP MATRIX_ORIGIN_RIGHT_DOWN
+#define MATRIX_MODE_ROW // is your setup MATRIX_MODE_ROW or MATRIX_MODE_COLLUM if not you can enable the USE_LED_LOOKUP feature below
+#define COUNT_OF_LAYERS 2 //SET LAYER COUNT HERE WATCH YOUR RAM
 #define LED_COLOR_MODE_RGB // DEFAULT RGB RBG BGR BRG GBR GRB
+#define ENABLE_OUTPUT_INTENSE //enables a additional intense multiplier to the output layer
 //YOU CAN HERE CREATE A LOOKUPTABLE IF YOUR LEDS NOT IN ROW OR COLLUM
 //#define USE_LED_LOOKUP
 #ifdef USE_LED_LOOKUP
-//the lookuptable must be the size of yourled amount!!!!
-const int led_id_lookup_size = 256;
-const int led_id_lookup[256] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254 };
+//you can change the led id here if your setup is not collum/row based
+//in the defualt setting the virtual led id of led 0 is 0
+//if your real first led has for e.g. the number 10 then you can change it here
+//you can use excel sheet 'led_creator'
+const int led_id_lookup[LED_COUNT] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254 };
 #endif
 //CONST DEFINES
-#define MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR 3
+#define MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR 1 // must be 3 or 1 if you choose one you cant move outside the visible area
+#define LED_COUNT (VISIBLE_MATRIX_WITH*VISIBLE_MATRIX_HEIGHT)
 #define TOTAL_MATRIX_WIDHT (MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR * VISIBLE_MATRIX_WITH)
 #define TOTAL_MATRIX_HEIGHT (MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR * VISIBLE_MATRIX_HEIGHT)
 #define TOTAL_MATRIX_CELL_COUNT (VISIBLE_MATRIX_WITH*VISIBLE_MATRIX_HEIGHT)
@@ -145,7 +149,6 @@ inline FRM_COLOR_TYPE get_g(){
     }
 };
 #endif
-
 #ifndef F_FRM_ANCHOR
 #define F_FRM_ANCHOR
 #define FRM_INT int
@@ -177,7 +180,12 @@ class FRM_ANCHOR
 #endif
 
 
-float layer_intense[COUNT_OF_LAYERS] = {1.0f,1.0f,1.0f,1.0f};
+float layer_intense[COUNT_OF_LAYERS];
+#ifdef ENABLE_OUTPUT_INTENSE
+float output_layer_intense = 1.0f;
+#endif // ENABLE_OUTPUT_INTENSE
+
+
 FRM_COLOR layers[COUNT_OF_LAYERS][TOTAL_MATRIX_WIDHT][TOTAL_MATRIX_HEIGHT]; //our layers
 FRM_COLOR output_layer[VISIBLE_MATRIX_WITH][VISIBLE_MATRIX_HEIGHT]; //the final layer to draw
 //CONST COLORS
@@ -195,7 +203,8 @@ public:
 
 
 	void process_animation(); //if playing play animation to layer
-	void load_animation(FRM_COLOR* _dest_layer, FRM_COLOR* _frame_data, int* _frame_count);
+	void load_animation(FRM_COLOR* _dest_layer, FRM_COLOR* _frame_data, int* _frame_count); 
+
 
 	//VARS
 	int current_animation_frame = 0;
@@ -207,7 +216,14 @@ public:
 	FRM_COLOR* animation_data = nullptr; //points to the FRM <animation_name>-Array
 	FRM_COLOR* destination_layer = nullptr;
 	bool animation_playing = false;
+
+#if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 0
+	FRM_ANCHOR animation_anchor = FRM_ANCHOR(0, 0);
+#else
 	FRM_ANCHOR animation_anchor = FRM_ANCHOR(VISIBLE_MATRIX_WITH, VISIBLE_MATRIX_HEIGHT);
+#endif // MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 0
+
+
 private:
 
 };
@@ -230,7 +246,7 @@ FRM_ANIMATION::~FRM_ANIMATION()
 #endif
 
 
-#define
+
 //RAIN ANIMATION
 FRM_COLOR rain[4][8][8] = {{{FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}}, {{FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)},}, {{FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}}, {{FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}}};
 const int frame_size = 4;
@@ -250,12 +266,16 @@ float steps = 1.0f / 50.0f;
 #ifdef __AVR__
 #include <avr/power.h>
 #endif
-#define WS2812_PIN 14 //SETUP THE LED OUT
+#define WS2812_PIN 5  //SETUP THE LED OUT
 Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(TOTAL_MATRIX_CELL_COUNT, WS2812_PIN, NEO_GRB + NEO_KHZ800);
 
-
-
-
+#include <SPI.h>
+#include <SD.h>
+// set up variables using the SD utility library functions:
+Sd2Card card;
+SdVolume volume;
+SdFile root;
+#define SD_CARD_CS_PIN 4
 
 //GET LED
 //SET LED COLOR WITH #defined LOOKUPTABLE
@@ -295,7 +315,7 @@ inline void set_led_color(FRM_ANCHOR _pos, FRM_COLOR* _color) {
 #endif
   //GET ID VIA LOOKUPTABLE
 #ifdef USE_LED_LOOKUP
-  if (led_id > led_id_lookup_size) {
+  if (led_id > LED_COUNT) {
     led_id = 0;
     //ADD DEBUG SHIT
   }
@@ -305,7 +325,11 @@ inline void set_led_color(FRM_ANCHOR _pos, FRM_COLOR* _color) {
 
   //SET COLOR
   //CHANGE IT TO HEXVALUE
-
+#ifdef  ENABLE_OUTPUT_INTENSE
+  _color->r =(_color->r * output_layer_intense);
+  _color->g = (_color->g * output_layer_intense);
+  _color->b = (_color->b * output_layer_intense);
+#endif //  ENABLE_OUTPUT_INTENSITY
 #ifdef LED_COLOR_MODE_RGB
 led_matrix.setPixelColor(led_id, _color->r, _color->g, _color->b);
 #endif
@@ -329,10 +353,6 @@ led_matrix.setPixelColor(led_id, _color->r, _color->g, _color->b);
 #endif
 }
 
-
-
-
-
 void generate_output_layer() {
  
     for (int w = 0; w < VISIBLE_MATRIX_WITH; w++) {
@@ -343,21 +363,27 @@ void generate_output_layer() {
 
    for(int _i = 0; _i < COUNT_OF_LAYERS; _i++){
     int i =  _i;//REMOVE THAT SHIT
+#if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 0
+	if (!layers[i][w ][h ].equals(output_layer[w][h]) && !layers[i][w][h].equals(clear_color)) {
+		output_layer[w][h].set_color(
+			layers[i][w ][h ].r * layer_intense[i],
+			layers[i][w ][h ].g * layer_intense[i],
+			layers[i][w ][h ].b * layer_intense[i]);
+	}
+#else
         if (!layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(output_layer[w][h]) && !layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(clear_color)) {
           output_layer[w][h].set_color(
                                         layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].r * layer_intense[i],
                                         layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].g * layer_intense[i],
                                         layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].b * layer_intense[i]);          
       }
+#endif
    }
 
       }
     }
   
 }
-
-
-
 void clear_all_layers() {
   for (size_t i = 0; i < COUNT_OF_LAYERS; i++)
   {
@@ -370,8 +396,6 @@ void clear_all_layers() {
     }
   }
 }
-
-
 void clear_layer(const int _id) {
   for (size_t x = 0; x < TOTAL_MATRIX_WIDHT; x++)
   {
@@ -381,7 +405,6 @@ void clear_layer(const int _id) {
     }
   }
 }
-
 void clear_output_layer() {
   for (size_t x = 0; x < VISIBLE_MATRIX_WITH; x++)
   {
@@ -391,9 +414,6 @@ void clear_output_layer() {
     }
   }
 }
-
-
-
 void show_output_layer() {
   for (size_t x = 0; x < VISIBLE_MATRIX_WITH; x++)
   {
@@ -404,7 +424,6 @@ void show_output_layer() {
   }
   led_matrix.show();
 }
-
 void  show_specific_layer(const int _id) {
   for (int w = 0; w < VISIBLE_MATRIX_WITH; w++) {
     for (int h = 0; h < VISIBLE_MATRIX_HEIGHT; h++) {
@@ -413,8 +432,12 @@ void  show_specific_layer(const int _id) {
   }
   show_output_layer();
 }
-
-
+inline void set_layer_color(const int _layer, const FRM_ANCHOR* _pos, const FRM_COLOR _color) {
+	layers[_layer][_pos->x + VISIBLE_MATRIX_WITH][_pos->y + VISIBLE_MATRIX_HEIGHT].set_color(_color);
+}
+inline void set_layer_color(const int _layer, const unsigned int _x, const unsigned int _y, const FRM_COLOR _color) {
+	layers[_layer][_x + VISIBLE_MATRIX_WITH][_y + VISIBLE_MATRIX_HEIGHT].set_color(_color);
+}
 
 
 void setup()
@@ -423,7 +446,54 @@ void setup()
   led_matrix.begin();
   clear_all_layers();
   clear_output_layer();
+  //INIT LAYER INTENSES
+  for (size_t i = 0; i < COUNT_OF_LAYERS; i++)
+  {
+	  layer_intense[i] = 1.0f;
+  }
+  //YES DIRTY
+#ifdef ENABLE_OUTPUT_INTENSE
+  output_layer_intense = 1.0f;
+#endif // ENABLE_OUTPUT_INTENSE
 
+  
+  Serial.print("Initializing SD card...");
+
+  File printFile;
+  String buffer;
+  boolean SDfound;
+
+
+  if (SDfound == 0) {
+	  if (!SD.begin(SD_CARD_CS_PIN)) {
+		  Serial.print("The SD card cannot be found");
+		  while (1);
+	  }
+  }
+  SDfound = 1;
+  printFile = SD.open("Part1.txt");
+
+  if (!printFile) {
+	  Serial.print("The text file cannot be opened");
+	  while (1);
+  }
+
+  while (printFile.available()) {
+	  buffer = printFile.readStringUntil('\n');
+	  Serial.println(buffer); //Printing for debugging purpose         
+							  //do some action here
+  }
+
+  printFile.close();
+
+
+  /*
+  TODO
+  load alle .anim files from sdcard to sram chip
+  add a func to animation struct that loads the data to a layer an play them
+  
+  
+  */
 
 
   /* add setup code here */
@@ -432,8 +502,9 @@ void setup()
   {
 	  for (size_t y = 0; y < 8; y++)
 	  {
-		  layers[0][x + VISIBLE_MATRIX_WITH][y + VISIBLE_MATRIX_HEIGHT].set_color(rain[loaded_animation][x][y]);
-		  layers[1][x + VISIBLE_MATRIX_WITH][y + VISIBLE_MATRIX_HEIGHT].set_color(rain[loaded_animation + 1][x][y]);
+
+		  set_layer_color(0, x, y, rain[loaded_animation][x][y]);
+		  set_layer_color(1, x, y, rain[loaded_animation+1][x][y]);
 
 	  }
   }
@@ -479,8 +550,9 @@ void loop(){
 			   {
 				   for (size_t y = 0; y < 8; y++)
 				   {
-					   layers[1][x + VISIBLE_MATRIX_WITH][y + VISIBLE_MATRIX_HEIGHT].set_color(rain[loaded_animation][x][y]);
-					   layers[0][x + VISIBLE_MATRIX_WITH][y + VISIBLE_MATRIX_HEIGHT].set_color(rain[loaded_animation + 1][x][y]);
+
+					   set_layer_color(0, x, y, rain[loaded_animation][x][y]);
+					   set_layer_color(1, x, y, rain[loaded_animation + 1][x][y]);
 
 				   }
 			   }
