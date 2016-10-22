@@ -63,4 +63,10 @@ For further build instructions,please see the pictures at /images/
 # (OPTIONAL) ANIMATION SETUP
  * you need for every weather state (see the owm api documentation) an _weather_state_.anim ascii file in the root dir of the sd card
  * to create or edit our own animations directly in the .anim file or you use the animation creator tool or the frame_generator excel sheet
- 
+ * The colors of the animation are stored in a color lookup table. In the defualt code there are 64 Colors inspired from the NES System :)
+   http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=File:Palette_NTSC.png
+ * You can use these color codes to setup a frame for the frames stored in the *.anim file
+ * The *.animfile stores the frames row by row, e.g. : _color_code_,_color_code_,...
+ * The frames are seperated by a blank line.
+ * With the 23K256 whitch has 32768Bytes
+ * if you have no more space in your ram then you can define COLOR_TABLE_PROGMEM to move the color tbale to your flash
