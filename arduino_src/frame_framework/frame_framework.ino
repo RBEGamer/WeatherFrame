@@ -1,36 +1,14 @@
-/*
-  add funktion that renders the final layer
-  auf jeden layer kann ich eine animation legen
-
-
-  add farbpalette in excel eine 16stufen farbpalette bauen und hier einf�gen
-  add funktion farbid to rgb
-  add funktion find neard farb id by rgb
-
-
-TODO
-
-
-->add animation struct
-->add animation frame0 -> frame1 linear
-*/
+//WeatherFrame Framework C 2016 Marcel Ochsendorf github.com/RBEGamer marcel.ochsendorf@gmail.com marcelochsendorf.com
 
 
 
 
-
-
-
-
-
-//
-#define OWM_API_KEY "123564324"
-#define OWM_CITY_ID "213213123"
-
+//OWM SETTINGS
+#define OWM_API_KEY "94c8538b04c8c03552d3a6ccc4deb01c"
+#define OWM_CITY_ID "3247449" //AACHEN
 //WLAN SETTINGS
-#define ESP_WLAN_SSID "blablabla"
-#define ESP_WLAN_KEY "1234"
-
+#define ESP_WLAN_SSID "test_wifi"
+#define ESP_WLAN_KEY "6226054527192856"
 //PINS
 #define WS2812_PIN 5  //SETUP THE LED OUT
 #define SD_CARD_CS_PIN 4
@@ -45,13 +23,19 @@ TODO
 #define LED_COLOR_MODE_RGB // DEFAULT RGB RBG BGR BRG GBR GRB
 #define ENABLE_OUTPUT_INTENSE //enables a additional intense multiplier to the output layer
 //YOU CAN HERE CREATE A LOOKUPTABLE IF YOUR LEDS NOT IN ROW OR COLLUM
-//#define USE_LED_LOOKUP
-#ifdef USE_LED_LOOKUP
 //you can change the led id here if your setup is not collum/row based
 //in the defualt setting the virtual led id of led 0 is 0
 //if your real first led has for e.g. the number 10 then you can change it here
-//you can use excel sheet 'led_creator'
+//you can use excel sheet 'led_lookup_creator'
+
+//#define USE_LED_LOOKUP
+//#define USE_LED_LOOKUP_PROGMEM
+#ifdef USE_LED_LOOKUP
 const int led_id_lookup[LED_COUNT] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254 };
+#else
+#ifdef USE_LED_LOOKUP_PROGMEM
+const int led_id_lookup[LED_COUNT] PROGMEM = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254 };
+#endif
 #endif
 //CONST DEFINES
 #define MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR 3 // must be 3 or 1 if you choose one you cant move outside the visible area
@@ -75,40 +59,30 @@ const int led_id_lookup[LED_COUNT] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
 class FRM_COLOR
 {
   public:
-
     FRM_COLOR_TYPE r;
     FRM_COLOR_TYPE g;
     FRM_COLOR_TYPE b;
     const FRM_COLOR_TYPE min_off = 0;
     const FRM_COLOR_TYPE max_on = 255;
-
     FRM_COLOR(FRM_COLOR_TYPE _r, FRM_COLOR_TYPE _g, FRM_COLOR_TYPE _b) {
       r = _r;
       g = _g;
       b = _b;
-
     }
-
     FRM_COLOR() {
       r = min_off;
       g = min_off;
       b = min_off;
-
     }
-
-
-
     void make_max() {
       r = max_on;
       g = max_on;
       b = max_on;
     }
-
     void make_min() {
       r = min_off;
       g = min_off;
       b = min_off;
-
     }
     //NOT SAFE !!!!
     void invert() {
@@ -116,32 +90,25 @@ class FRM_COLOR
       g = max_on - g;
       b = max_on - b;
     }
-
     inline void set_color(FRM_COLOR_TYPE _r, FRM_COLOR_TYPE _g, FRM_COLOR_TYPE _b) {
       r = _r;
       g = _g ;
       b = _b ;
     }
-
     void set_color(FRM_COLOR _c) {
-
       r = _c.r ;
       g = _c.g ;
       b = _c.b ;
     }
-
-inline FRM_COLOR_TYPE get_r(){
-
-  return r;
-  }
-
-inline FRM_COLOR_TYPE get_g(){
-  return g;
-  }
-
-  inline FRM_COLOR_TYPE get_b(){
-  return b;
-  }
+    inline FRM_COLOR_TYPE get_r(){
+      return r;
+    }
+    inline FRM_COLOR_TYPE get_g(){
+      return g;
+    }
+    inline FRM_COLOR_TYPE get_b(){
+      return b;
+    }
     bool equals(FRM_COLOR _e) {
       //return _c1.r && _c2.r && _c1.g && _c2.g && _c1.b && _c2.b;
       if (_e.r == r && _e.g == g && _e.b == b) {
@@ -149,12 +116,13 @@ inline FRM_COLOR_TYPE get_g(){
       }
       return false;
     }
-
     FRM_COLOR operator=(const FRM_COLOR _right ) {
       return FRM_COLOR(_right.r, _right.g, _right.b);
     }
 };
 #endif
+
+
 #ifndef F_FRM_ANCHOR
 #define F_FRM_ANCHOR
 #define FRM_INT int
@@ -163,25 +131,20 @@ class FRM_ANCHOR
   public:
     FRM_INT x;
     FRM_INT y;
-
     FRM_ANCHOR() {
       x = 0;
       y = 0;
     }
-
     FRM_ANCHOR(const FRM_INT _x, const FRM_INT _y) {
       x = _x;
       y = _y;
     }
     ~FRM_ANCHOR() {
     }
-
     FRM_ANCHOR operator=(const FRM_ANCHOR _right) {
       return FRM_ANCHOR(_right.x, _right.y);
     }
-
   private:
-
 };
 #endif
 
@@ -196,7 +159,6 @@ FRM_COLOR layers[COUNT_OF_LAYERS][TOTAL_MATRIX_WIDHT][TOTAL_MATRIX_HEIGHT]; //ou
 FRM_COLOR output_layer[VISIBLE_MATRIX_WITH][VISIBLE_MATRIX_HEIGHT]; //the final layer to draw
 //CONST COLORS
 const FRM_COLOR clear_color = FRM_COLOR(0, 0, 0);
-
 /* COLOR TABLE SEE EXCEL FILE*/
 #define FTC FRM_COLOR //<- is for the excel table generation because the cell char limit.... :/
 #ifdef COLOR_TABLE_PROGMEM
@@ -247,45 +209,18 @@ private:
 FRM_ANIMATION::FRM_ANIMATION()
 {
 }
-
 FRM_ANIMATION::~FRM_ANIMATION()
 {
 }
-
-
-
-
-
-
-
-
 #endif
 
 
 
-//RAIN ANIMATION
-FRM_COLOR rain[4][8][8] = {{{FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}}, {{FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)},}, {{FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}}, {{FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(100, 149, 237), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237)}, {FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0), FRM_COLOR(100, 149, 237), FRM_COLOR(0, 0, 0), FRM_COLOR(0, 0, 0)}}};
-const int frame_size = 4;
-unsigned long previousMillis = 0;
-const long interval = 1000;
-int animation_state = 0;
-float fade = 0.0f;
-int loaded_animation = 0;
-bool dir = false;
-float steps = 1.0f / 50.0f;
-
-
-
-
-
-
-/*
   /*LED VARS*/
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
 #include <avr/power.h>
 #endif
-
 Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(TOTAL_MATRIX_CELL_COUNT, WS2812_PIN, NEO_GRB + NEO_KHZ800);
 
 #include <SPI.h>
@@ -383,46 +318,29 @@ led_matrix.setPixelColor(led_id, _color->r, _color->g, _color->b);
 }
 
 void generate_output_layer() {
-
-    for (int w = 0; w < VISIBLE_MATRIX_WITH; w++) {
-      for (int h = 0; h < VISIBLE_MATRIX_HEIGHT; h++) {
+    for (size_t w = 0; w < VISIBLE_MATRIX_WITH; w++) {
+      for (size_t h = 0; h < VISIBLE_MATRIX_HEIGHT; h++) {
         output_layer[w][h].set_color(clear_color);
 
-   //   for (int i = 0; i < COUNT_OF_LAYERS; i++) {
-
-   for(int _i = 0; _i < COUNT_OF_LAYERS; _i++){
-    int i =  _i;//REMOVE THAT SHIT
-#if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 0
-	if (!layers[i][w ][h ].equals(output_layer[w][h]) && !layers[i][w][h].equals(clear_color)) {
-		output_layer[w][h].set_color(
-			layers[i][w ][h ].r * layer_intense[i],
-			layers[i][w ][h ].g * layer_intense[i],
-			layers[i][w ][h ].b * layer_intense[i]);
-	}
-#else
-        if (!layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(output_layer[w][h]) && !layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(clear_color)) {
-          output_layer[w][h].set_color(
-                                        layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].r * layer_intense[i],
-                                        layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].g * layer_intense[i],
-                                        layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].b * layer_intense[i]);
-      }
-#endif
-   }
-
+        for(size_t _i = 0; _i < COUNT_OF_LAYERS; _i++){
+          size_t i =  _i;//REMOVE THAT SHIT
+            #if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 0
+	            if (!layers[i][w ][h ].equals(output_layer[w][h]) && !layers[i][w][h].equals(clear_color)) {
+		output_layer[w][h].set_color(layers[i][w ][h ].r * layer_intense[i],layers[i][w ][h ].g * layer_intense[i],layers[i][w ][h ].b * layer_intense[i]);
+              }
+            #else
+              if (!layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(output_layer[w][h]) && !layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(clear_color)) {
+                output_layer[w][h].set_color(layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].r * layer_intense[i],layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].g * layer_intense[i],layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].b * layer_intense[i]);
+              }
+           #endif
+         }
       }
     }
-
 }
 void clear_all_layers() {
   for (size_t i = 0; i < COUNT_OF_LAYERS; i++)
   {
-    for (size_t x = 0; x < TOTAL_MATRIX_WIDHT; x++)
-    {
-      for (size_t y = 0; y < TOTAL_MATRIX_HEIGHT; y++)
-      {
-        layers[i][x][y] = clear_color;
-      }
-    }
+    clear_layer(i);
   }
 }
 void clear_layer(const int _id) {
@@ -454,8 +372,8 @@ void show_output_layer() {
   led_matrix.show();
 }
 void  show_specific_layer(const int _id) {
-  for (int w = 0; w < VISIBLE_MATRIX_WITH; w++) {
-    for (int h = 0; h < VISIBLE_MATRIX_HEIGHT; h++) {
+  for (size_t w = 0; w < VISIBLE_MATRIX_WITH; w++) {
+    for (size_t h = 0; h < VISIBLE_MATRIX_HEIGHT; h++) {
       output_layer[w][h].set_color(layers[_id][w + VISIBLE_MATRIX_WITH][h + VISIBLE_MATRIX_HEIGHT]);
     }
   }
@@ -530,22 +448,20 @@ void setup()
   */
 
 //INIT SRAM WITH DEFAUlT VALUES
-Serial.println("INIT SRAM")
+Serial.println("INIT SRAM");
 for (i=0; i < SRAM_MAX:SIZE; i++) {
       spiRam.write_byte(i, (unsigned byte)SRAM_INIT_BYTE);
 }
 
-int animation_offset
-int test = (8*8*3)
-for (i=0; i < test:SIZE; i+=3) {
-      spiRam.write_byte(i, (unsigned byte)255);
-      spiRam.write_byte(i+1, (unsigned byte)0);
-      spiRam.write_byte(i+2, (unsigned byte)255);
+Serial.println("write SRAM");
+int test = (8*8*3);
+for (size_t i=0; i < test; i+=3) {
+      spiRam.write_byte(i, (unsigned byte)3);
 }
 
-
-for (i=0; i < test:SIZE; i++) {
-     set_layer_color(0,i % 8,64/i, color_palette[spiRam.read_byte(i)]);
+Serial.println("read SRAM");
+for (size_t i=0; i < test:SIZE; i++) {
+     set_layer_color(0,(i % 8),(64/i), color_palette[spiRam.read_byte(i)]);
 }
 
 
@@ -563,10 +479,6 @@ for (i=0; i < test:SIZE; i++) {
  // }
   generate_output_layer();
   show_output_layer();
-
-
-
-
 }
 
 
@@ -577,7 +489,7 @@ void loop(){
 
 
 return;
-
+/*
 	if (dir) {
 		fade += steps;
 	}
@@ -611,20 +523,8 @@ return;
 			   }
 
 		   }
-
-
 		   generate_output_layer();
 		   show_output_layer();
-
 		   delay(70);
-
-
-
-
-
-
-
-
-
-
+*/
 }
