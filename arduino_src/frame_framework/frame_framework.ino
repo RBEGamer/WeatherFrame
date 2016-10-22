@@ -544,10 +544,8 @@ for (i=0; i < test:SIZE; i+=3) {
 }
 
 
-for (i=0; i < test:SIZE; i+=3) {
-     layers[0] spiRam.read_byte(i);
-      spiRam.write_byte(i+1);
-      spiRam.write_byte(i+2);
+for (i=0; i < test:SIZE; i++) {
+     set_layer_color(0,i % 8,64/i, color_palette[spiRam.read_byte(i)]);
 }
 
 
