@@ -33,4 +33,14 @@ C:\Users\marcel\AppData\Local\Temp\VMicroBuilds\frame_framework\esp8266_nodemcuv
  C:\Users\marcel\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/debug.h \
  C:\Users\marcel\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\variants\nodemcu/pins_arduino.h \
  C:\Users\marcel\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\variants\nodemcu/../generic/common.h \
- C:\Users\marcel\Documents\Arduino\libraries\Adafruit_NeoPixel/Adafruit_NeoPixel.h
+ C:\Users\marcel\Documents\Arduino\libraries\Adafruit_NeoPixel/Adafruit_NeoPixel.h \
+ C:\Users\marcel\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\SPI/SPI.h \
+ C:\Users\marcel\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\SD\src/SD.h \
+ C:\Users\marcel\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\SD\src/utility/SdFat.h \
+ C:\Users\marcel\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\SD\src/utility/Sd2Card.h \
+ C:\Users\marcel\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\SD\src/utility/Sd2PinMap.h \
+ C:\Users\marcel\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\SD\src/utility/SdInfo.h \
+ C:\Users\marcel\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\SD\src/utility/FatStructs.h \
+ C:\Users\marcel\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/Print.h \
+ C:\Users\marcel\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\SD\src/utility/SdFatUtil.h \
+ C:\Users\marcel\Documents\Arduino\libraries\SpiRAM/SpiRAM.h

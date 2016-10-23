@@ -27,7 +27,6 @@
 //in the defualt setting the virtual led id of led 0 is 0
 //if your real first led has for e.g. the number 10 then you can change it here
 //you can use excel sheet 'led_lookup_creator'
-
 //#define USE_LED_LOOKUP
 //#define USE_LED_LOOKUP_PROGMEM
 #ifdef USE_LED_LOOKUP
@@ -37,6 +36,8 @@ const int led_id_lookup[LED_COUNT] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
 const int led_id_lookup[LED_COUNT] PROGMEM = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254 };
 #endif
 #endif
+
+
 //CONST DEFINES
 #define MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR 3 // must be 3 or 1 if you choose one you cant move outside the visible area
 #define LED_COUNT (VISIBLE_MATRIX_WITH*VISIBLE_MATRIX_HEIGHT)
@@ -58,7 +59,7 @@ const int led_id_lookup[LED_COUNT] PROGMEM = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 #ifndef F_FRM_COLOR
 #define F_FRM_COLOR
 #define COLOR_DESC FRM_COLOR
-#define FRM_COLOR_TYPE unsigned byte
+#define FRM_COLOR_TYPE  unsigned char
 //TODO IMPLEMENT OPERATOR
 class FRM_COLOR
 {
@@ -125,8 +126,6 @@ class FRM_COLOR
     }
 };
 #endif
-
-
 #ifndef F_FRM_ANCHOR
 #define F_FRM_ANCHOR
 #define FRM_INT int
@@ -153,6 +152,20 @@ class FRM_ANCHOR
 #endif
 
 
+//COLOR PALETTE
+//if you define COLOR_TABLE_PROGMEM the color table will be stored in the flash memory so it can be slower
+//#define COLOR_TABLE_PROGMEM 
+/* COLOR TABLE SEE EXCEL FILE*/
+#define FTC FRM_COLOR //<- is for the excel table generation because the cell char limit.... :/
+#ifdef COLOR_TABLE_PROGMEM
+const FTC color_lookup_table[64] PROGMEM = { FTC(124,124,124),FTC(0,0,252),FTC(0,0,188),FTC(68,40,188),FTC(148,0,132),FTC(168,0,32),FTC(168,16,0),FTC(136,20,0),FTC(80,48,0),FTC(0,120,0),FTC(0,104,0),FTC(0,88,0),FTC(0,64,88),FTC(0,0,0),FTC(0,0,0),FTC(0,0,0),FTC(188,188,188),FTC(0,120,248),FTC(0,88,248),FTC(104,68,252),FTC(216,0,204),FTC(228,0,88),FTC(248,56,0),FTC(228,92,16),FTC(172,124,0),FTC(0,184,0),FTC(0,168,0),FTC(0,168,68),FTC(0,136,136),FTC(0,0,0),FTC(0,0,0),FTC(0,0,0),FTC(248,248,248),FTC(60,188,252),FTC(104,136,252),FTC(152,120,248),FTC(248,120,248),FTC(248,88,152),FTC(248,120,88),FTC(252,160,68),FTC(248,184,0),FTC(184,248,24),FTC(88,216,84),FTC(88,248,152),FTC(0,232,216),FTC(120,120,120),FTC(0,0,0),FTC(0,0,0),FTC(252,252,252),FTC(164,228,252),FTC(184,184,248),FTC(216,184,248),FTC(248,184,248),FTC(248,164,192),FTC(240,208,176),FTC(252,224,168),FTC(248,216,120),FTC(216,248,120),FTC(184,248,184),FTC(184,248,216),FTC(0,252,252),FTC(248,216,248),FTC(0,0,0),FTC(0,0,0) };
+#else
+const FTC color_lookup_table[64] = { FTC(124,124,124),FTC(0,0,252),FTC(0,0,188),FTC(68,40,188),FTC(148,0,132),FTC(168,0,32),FTC(168,16,0),FTC(136,20,0),FTC(80,48,0),FTC(0,120,0),FTC(0,104,0),FTC(0,88,0),FTC(0,64,88),FTC(0,0,0),FTC(0,0,0),FTC(0,0,0),FTC(188,188,188),FTC(0,120,248),FTC(0,88,248),FTC(104,68,252),FTC(216,0,204),FTC(228,0,88),FTC(248,56,0),FTC(228,92,16),FTC(172,124,0),FTC(0,184,0),FTC(0,168,0),FTC(0,168,68),FTC(0,136,136),FTC(0,0,0),FTC(0,0,0),FTC(0,0,0),FTC(248,248,248),FTC(60,188,252),FTC(104,136,252),FTC(152,120,248),FTC(248,120,248),FTC(248,88,152),FTC(248,120,88),FTC(252,160,68),FTC(248,184,0),FTC(184,248,24),FTC(88,216,84),FTC(88,248,152),FTC(0,232,216),FTC(120,120,120),FTC(0,0,0),FTC(0,0,0),FTC(252,252,252),FTC(164,228,252),FTC(184,184,248),FTC(216,184,248),FTC(248,184,248),FTC(248,164,192),FTC(240,208,176),FTC(252,224,168),FTC(248,216,120),FTC(216,248,120),FTC(184,248,184),FTC(184,248,216),FTC(0,252,252),FTC(248,216,248),FTC(0,0,0),FTC(0,0,0) };
+#endif
+
+
+
+
 float layer_intense[COUNT_OF_LAYERS];
 #ifdef ENABLE_OUTPUT_INTENSE
 float output_layer_intense = 1.0f;
@@ -163,15 +176,6 @@ FRM_COLOR layers[COUNT_OF_LAYERS][TOTAL_MATRIX_WIDHT][TOTAL_MATRIX_HEIGHT]; //ou
 FRM_COLOR output_layer[VISIBLE_MATRIX_WITH][VISIBLE_MATRIX_HEIGHT]; //the final layer to draw
 //CONST COLORS
 const FRM_COLOR clear_color = FRM_COLOR(0, 0, 0);
-/* COLOR TABLE SEE EXCEL FILE*/
-#define FTC FRM_COLOR //<- is for the excel table generation because the cell char limit.... :/
-#ifdef COLOR_TABLE_PROGMEM
-const FTC color_lookup_table [64] PROGMEM ={FTC(124,124,124),FTC(0,0,252),FTC(0,0,188),FTC(68,40,188),FTC(148,0,132),FTC(168,0,32),FTC(168,16,0),FTC(136,20,0),FTC(80,48,0),FTC(0,120,0),FTC(0,104,0),FTC(0,88,0),FTC(0,64,88),FTC(0,0,0),FTC(0,0,0),FTC(0,0,0),FTC(188,188,188),FTC(0,120,248),FTC(0,88,248),FTC(104,68,252),FTC(216,0,204),FTC(228,0,88),FTC(248,56,0),FTC(228,92,16),FTC(172,124,0),FTC(0,184,0),FTC(0,168,0),FTC(0,168,68),FTC(0,136,136),FTC(0,0,0),FTC(0,0,0),FTC(0,0,0),FTC(248,248,248),FTC(60,188,252),FTC(104,136,252),FTC(152,120,248),FTC(248,120,248),FTC(248,88,152),FTC(248,120,88),FTC(252,160,68),FTC(248,184,0),FTC(184,248,24),FTC(88,216,84),FTC(88,248,152),FTC(0,232,216),FTC(120,120,120),FTC(0,0,0),FTC(0,0,0),FTC(252,252,252),FTC(164,228,252),FTC(184,184,248),FTC(216,184,248),FTC(248,184,248),FTC(248,164,192),FTC(240,208,176),FTC(252,224,168),FTC(248,216,120),FTC(216,248,120),FTC(184,248,184),FTC(184,248,216),FTC(0,252,252),FTC(248,216,248),FTC(0,0,0),FTC(0,0,0)};
-#else
-const FTC color_lookup_table [64] ={FTC(124,124,124),FTC(0,0,252),FTC(0,0,188),FTC(68,40,188),FTC(148,0,132),FTC(168,0,32),FTC(168,16,0),FTC(136,20,0),FTC(80,48,0),FTC(0,120,0),FTC(0,104,0),FTC(0,88,0),FTC(0,64,88),FTC(0,0,0),FTC(0,0,0),FTC(0,0,0),FTC(188,188,188),FTC(0,120,248),FTC(0,88,248),FTC(104,68,252),FTC(216,0,204),FTC(228,0,88),FTC(248,56,0),FTC(228,92,16),FTC(172,124,0),FTC(0,184,0),FTC(0,168,0),FTC(0,168,68),FTC(0,136,136),FTC(0,0,0),FTC(0,0,0),FTC(0,0,0),FTC(248,248,248),FTC(60,188,252),FTC(104,136,252),FTC(152,120,248),FTC(248,120,248),FTC(248,88,152),FTC(248,120,88),FTC(252,160,68),FTC(248,184,0),FTC(184,248,24),FTC(88,216,84),FTC(88,248,152),FTC(0,232,216),FTC(120,120,120),FTC(0,0,0),FTC(0,0,0),FTC(252,252,252),FTC(164,228,252),FTC(184,184,248),FTC(216,184,248),FTC(248,184,248),FTC(248,164,192),FTC(240,208,176),FTC(252,224,168),FTC(248,216,120),FTC(216,248,120),FTC(184,248,184),FTC(184,248,216),FTC(0,252,252),FTC(248,216,248),FTC(0,0,0),FTC(0,0,0)};
-#endif
-
-
 const FRM_ANCHOR center = FRM_ANCHOR(ANCHOR_X, ANCHOR_Y);
 
 
@@ -185,7 +189,7 @@ public:
 
 
 unsigned int sram_start_pos = 0;
-unsigned int
+
 #if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 1
 	FRM_ANCHOR animation_anchor = FRM_ANCHOR(0, 0);
 #else
@@ -225,11 +229,11 @@ SdFile root;
 //SRAM FILES
 #include <SpiRAM.h>
 SpiRAM spiRam(0, SS_PIN);
-#define SRAWM_BYTE_SIZE 23768
-#define SRAWM_INIT_BYTE 0x00
+#define SRAM_MAX_SIZE 32768
+#define SRAM_INIT_BYTE 0
 
 //STORE VARS
-byte sd_readed_file_buffer* = NULL;
+//byte sd_readed_file_buffer* = NULL;
 
 
 //GET LED
@@ -322,27 +326,32 @@ void generate_output_layer() {
       }
     }
 }
+
+
+void clear_layer(const int _id) {
+	for (size_t x = 0; x < TOTAL_MATRIX_WIDHT; x++)
+	{
+		for (size_t y = 0; y < TOTAL_MATRIX_HEIGHT; y++)
+		{
+			layers[_id][x][y].set_color(clear_color);
+		}
+	}
+}
+
+
 void clear_all_layers() {
   for (size_t i = 0; i < COUNT_OF_LAYERS; i++)
   {
     clear_layer(i);
   }
 }
-void clear_layer(const int _id) {
-  for (size_t x = 0; x < TOTAL_MATRIX_WIDHT; x++)
-  {
-    for (size_t y = 0; y < TOTAL_MATRIX_HEIGHT; y++)
-    {
-      layers[_id][x][y] = clear_color;
-    }
-  }
-}
+
 void clear_output_layer() {
   for (size_t x = 0; x < VISIBLE_MATRIX_WITH; x++)
   {
     for (size_t y = 0; y < VISIBLE_MATRIX_HEIGHT; y++)
     {
-      output_layer[x][y] = clear_color;
+      output_layer[x][y].set_color(clear_color);
     }
   }
 }
@@ -443,19 +452,19 @@ void setup()
 
 //INIT SRAM WITH DEFAUlT VALUES
 Serial.println("INIT SRAM");
-for (i=0; i < SRAM_MAX:SIZE; i++) {
-      spiRam.write_byte(i, (unsigned byte)SRAM_INIT_BYTE);
+for (size_t i=0; i < SRAM_MAX_SIZE; i++) {
+      spiRam.write_byte(i, (unsigned char)SRAM_INIT_BYTE);
 }
 
 Serial.println("write SRAM");
 int test = (8*8*3);
 for (size_t i=0; i < test; i+=3) {
-      spiRam.write_byte(i, (unsigned byte)3);
+      spiRam.write_byte(i, 3);
 }
 
 Serial.println("read SRAM");
-for (size_t i=0; i < test:SIZE; i++) {
-     set_layer_color(0,(i % 8),(64/i), color_palette[spiRam.read_byte(i)]);
+for (size_t i=0; i < test; i++) {
+     set_layer_color(0,(i % 8),(64/i), color_lookup_table[spiRam.read_byte(i)]);
 }
 
 
