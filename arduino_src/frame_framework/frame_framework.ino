@@ -184,21 +184,8 @@ public:
 	~FRM_ANIMATION();
 
 
-	void process_animation(); //if playing play animation to layer
-	void load_animation(FRM_COLOR* _dest_layer, FRM_COLOR* _frame_data, int* _frame_count);
-
-
-	//VARS
-	int current_animation_frame = 0;
-	float fade_steps = 1.0f / 50.0f;
-	float current_fade_amount = 0.0f;
-	bool fade_dir = false;
-	int anmimation_frames = 4; // count of frames
-	int next_frame_interval = 1000; //time for next frame
-	FRM_COLOR* animation_data = nullptr; //points to the FRM <animation_name>-Array
-	FRM_COLOR* destination_layer = nullptr;
-	bool animation_playing = false;
-
+unsigned int sram_start_pos = 0;
+unsigned int
 #if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 1
 	FRM_ANCHOR animation_anchor = FRM_ANCHOR(0, 0);
 #else
@@ -206,7 +193,7 @@ public:
 #endif // MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 0
 
 
-private:
+
 
 };
 
@@ -383,6 +370,15 @@ inline void set_layer_color(const int _layer, const FRM_ANCHOR* _pos, const FRM_
 inline void set_layer_color(const int _layer, const unsigned int _x, const unsigned int _y, const FRM_COLOR _color) {
 	layers[_layer][_x + VISIBLE_MATRIX_WITH][_y + VISIBLE_MATRIX_HEIGHT].set_color(_color);
 }
+
+
+
+
+void load_animation_to_layer(const FRM_ANIMATION* _animation_to_load, FRM_COLOR* _dest_layer, const int _frame_to_load){
+  //get info
+  //load from sram direcly to layer
+}
+
 
 
 void setup()
