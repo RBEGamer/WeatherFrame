@@ -46,9 +46,13 @@ const int led_id_lookup[LED_COUNT] PROGMEM = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 #define FRAME_SIZE_WIDTH VISIBLE_MATRIX_WITH
 #define FRAME_SIZE_HEIGHT VISIBLE_MATRIX_HEIGHT
 //ANCHOR IST UP-LEFT IN THE VISIBLE AREA  HERE YOU CAN ADD A OFFSET
+#if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 3
 #define ANCHOR_X (1*VISIBLE_MATRIX_WITH)+0
 #define ANCHOR_Y (1*VISIBLE_MATRIX_HEIGHT)+0
-
+#else
+#define ANCHOR_X 0
+#define ANCHOR_Y 0
+#endif
 
 //COLOR STRUCT
 #ifndef F_FRM_COLOR
@@ -195,7 +199,7 @@ public:
 	FRM_COLOR* destination_layer = nullptr;
 	bool animation_playing = false;
 
-#if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 0
+#if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 1
 	FRM_ANCHOR animation_anchor = FRM_ANCHOR(0, 0);
 #else
 	FRM_ANCHOR animation_anchor = FRM_ANCHOR(VISIBLE_MATRIX_WITH, VISIBLE_MATRIX_HEIGHT);
@@ -249,7 +253,6 @@ inline void set_led_color(FRM_ANCHOR _pos, FRM_COLOR* _color) {
 #ifdef MATRIX_ORIGIN_LEFT_UP
   //NO CHANGE
 #endif
-
 #ifdef MATRIX_ORIGIN_LEFT_DOWN
   _pos.y = (VISIBLE_MATRIX_HEIGHT - 1) - _pos.y;
   _pos.x = (VISIBLE_MATRIX_WITH - 1) - _pos.x;
@@ -262,15 +265,12 @@ inline void set_led_color(FRM_ANCHOR _pos, FRM_COLOR* _color) {
 #ifdef MATRIX_ORIGIN_RIGHT_DOWN
   _pos.y = (VISIBLE_MATRIX_HEIGHT - 1) - _pos.y;
 #endif
-
-
 #ifdef MATRIX_MODE_COLLUM
   if (_pos.x % 2) //x gerade
     led_id = (_pos.x * VISIBLE_MATRIX_HEIGHT) + _pos.y;
   else //x ungerade
     led_id = (_pos.x * VISIBLE_MATRIX_HEIGHT) + ((VISIBLE_MATRIX_HEIGHT - 1) - _pos.y);
 #endif
-
 #ifdef MATRIX_MODE_ROW
   if (_pos.y % 2) //y gerade
     led_id =  _pos.x + (_pos.y * VISIBLE_MATRIX_WITH);
@@ -281,12 +281,10 @@ inline void set_led_color(FRM_ANCHOR _pos, FRM_COLOR* _color) {
 #ifdef USE_LED_LOOKUP
   if (led_id > LED_COUNT) {
     led_id = 0;
-    //ADD DEBUG SHIT
   }
   //get new id
   led_id = led_id_lookup[led_id];
 #endif
-
   //SET COLOR
   //CHANGE IT TO HEXVALUE
 #ifdef  ENABLE_OUTPUT_INTENSE
@@ -324,9 +322,9 @@ void generate_output_layer() {
 
         for(size_t _i = 0; _i < COUNT_OF_LAYERS; _i++){
           size_t i =  _i;//REMOVE THAT SHIT
-            #if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 0
+            #if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 1
 	            if (!layers[i][w ][h ].equals(output_layer[w][h]) && !layers[i][w][h].equals(clear_color)) {
-		output_layer[w][h].set_color(layers[i][w ][h ].r * layer_intense[i],layers[i][w ][h ].g * layer_intense[i],layers[i][w ][h ].b * layer_intense[i]);
+		            output_layer[w][h].set_color(layers[i][w ][h ].r * layer_intense[i],layers[i][w ][h ].g * layer_intense[i],layers[i][w ][h ].b * layer_intense[i]);
               }
             #else
               if (!layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(output_layer[w][h]) && !layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(clear_color)) {
