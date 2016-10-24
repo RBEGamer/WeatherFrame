@@ -27,6 +27,11 @@ For further build instructions,please see the pictures at /images/
  * Wires
  * Plasicglue and/or hotglue
  * Solder stuff
+
+# NEEDED SOFTWARE
+ * latest Arduino IDE
+ * SPI-SRAM Libary : http://playground.arduino.cc/Main/SpiRAM
+ * Adafruit-NeoPixel Libary : https://github.com/adafruit/Adafruit_NeoPixel
  
 # BUILD INSTRUCTION
  * Print all needed 3D Parts at the /3d_parts/ directory 
