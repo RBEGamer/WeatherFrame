@@ -12,20 +12,20 @@
 //PINS
 #define WS2812_PIN 5  //SETUP THE LED OUT
 #define SD_CARD_CS_PIN 4
-#define SRAM_CS_PIN 3
+#define SRAM_CS_PIN 10
 //DEFINE YOUR MATRIX SIZE HERE
 #define VISIBLE_MATRIX_WITH 8 //WIDTH
 #define VISIBLE_MATRIX_HEIGHT 8 //HEIGHT
 //YOU CAN DEFINE HERE YOUR MATRIX SETUP
 #define MATRIX_ORIGIN_LEFT_UP // where is your origin corner MATRIX_ORIGIN_LEFT_UP MATRIX_ORIGIN_LEFT_DOWN MATRIX_ORIGIN_RIGHT_UP MATRIX_ORIGIN_RIGHT_DOWN
 #define MATRIX_MODE_ROW // is your setup MATRIX_MODE_ROW or MATRIX_MODE_COLLUM if not you can enable the USE_LED_LOOKUP feature below
-#define COUNT_OF_LAYERS 4 //SET LAYER COUNT HERE WATCH YOUR RAM
+#define COUNT_OF_LAYERS 1 //SET LAYER COUNT HERE WATCH YOUR RAM
 #define LED_COLOR_MODE_RGB // DEFAULT RGB RBG BGR BRG GBR GRB
 #define ENABLE_OUTPUT_INTENSE //enables a additional intense multiplier to the output layer
 
 
 //CONST DEFINES
-#define MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR 3 // must be 3 or 1 if you choose one you cant move outside the visible area
+#define MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR 1 // must be 3 or 1 if you choose one you cant move outside the visible area
 #define LED_COUNT (VISIBLE_MATRIX_WITH*VISIBLE_MATRIX_HEIGHT)
 #define TOTAL_MATRIX_WIDHT (MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR * VISIBLE_MATRIX_WITH)
 #define TOTAL_MATRIX_HEIGHT (MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR * VISIBLE_MATRIX_HEIGHT)
@@ -72,6 +72,9 @@ class FRM_COLOR
     FRM_COLOR_TYPE b;
     const FRM_COLOR_TYPE min_off = 0;
     const FRM_COLOR_TYPE max_on = 255;
+
+
+	unsigned int responding_color_id = 0;
     FRM_COLOR(FRM_COLOR_TYPE _r, FRM_COLOR_TYPE _g, FRM_COLOR_TYPE _b) {
       r = _r;
       g = _g;
@@ -157,7 +160,7 @@ class FRM_ANCHOR
 
 //COLOR PALETTE
 //if you define COLOR_TABLE_PROGMEM the color table will be stored in the flash memory so it can be slower
-//#define COLOR_TABLE_PROGMEM 
+#define COLOR_TABLE_PROGMEM
 /* COLOR TABLE SEE EXCEL FILE*/
 #define FTC FRM_COLOR //<- is for the excel table generation because the cell char limit.... :/
 #ifdef COLOR_TABLE_PROGMEM
@@ -175,10 +178,11 @@ float output_layer_intense = 1.0f;
 #endif // ENABLE_OUTPUT_INTENSE
 
 
-FRM_COLOR layers[COUNT_OF_LAYERS][TOTAL_MATRIX_WIDHT][TOTAL_MATRIX_HEIGHT]; //our layers
+unsigned int layers[COUNT_OF_LAYERS][TOTAL_MATRIX_WIDHT][TOTAL_MATRIX_HEIGHT]; //our layers
 FRM_COLOR output_layer[VISIBLE_MATRIX_WITH][VISIBLE_MATRIX_HEIGHT]; //the final layer to draw
 //CONST COLORS
 const FRM_COLOR clear_color = FRM_COLOR(0, 0, 0);
+const unsigned int clear_color_id = 0; //see clearcolor at lookup table
 const FRM_ANCHOR center = FRM_ANCHOR(ANCHOR_X, ANCHOR_Y);
 
 
@@ -222,16 +226,12 @@ FRM_ANIMATION::~FRM_ANIMATION()
 Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(TOTAL_MATRIX_CELL_COUNT, WS2812_PIN, NEO_GRB + NEO_KHZ800);
 
 #include <SPI.h>
+#include <EEPROM.h>
 
-// SD CARD VARS
-#include <SD.h>
-Sd2Card card;
-SdVolume volume;
-SdFile root;
 
 //SRAM FILES
 #include <SpiRAM.h>
-SpiRAM spiRam(0, SS_PIN);
+SpiRAM spiRam(0, SRAM_CS_PIN);
 #define SRAM_MAX_SIZE 32768
 #define SRAM_INIT_BYTE 0
 
@@ -308,7 +308,6 @@ led_matrix.setPixelColor(led_id, _color->g, _color->r, _color->b);
 led_matrix.setPixelColor(led_id, _color->r, _color->g, _color->b);
 #endif
 }
-
 void generate_output_layer() {
     for (size_t w = 0; w < VISIBLE_MATRIX_WITH; w++) {
       for (size_t h = 0; h < VISIBLE_MATRIX_HEIGHT; h++) {
@@ -317,20 +316,21 @@ void generate_output_layer() {
         for(size_t _i = 0; _i < COUNT_OF_LAYERS; _i++){
           size_t i =  _i;//REMOVE THAT SHIT
             #if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 1
-	            if (!layers[i][w ][h ].equals(output_layer[w][h]) && !layers[i][w][h].equals(clear_color)) {
+	            if (!layers[i][w ][h ].equals(output_layer[w][h]) && !layers[i][w][h] == ) {
+					//color_lookup_table[
 		            output_layer[w][h].set_color(layers[i][w ][h ].r * layer_intense[i],layers[i][w ][h ].g * layer_intense[i],layers[i][w ][h ].b * layer_intense[i]);
+					output_layer[w][h].responding_color_id = layers[i][w][h];
               }
             #else
               if (!layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(output_layer[w][h]) && !layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(clear_color)) {
                 output_layer[w][h].set_color(layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].r * layer_intense[i],layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].g * layer_intense[i],layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].b * layer_intense[i]);
-              }
+				output_layer[w][h].responding_color_id = layers[i][w][h];
+				}
            #endif
          }
       }
     }
 }
-
-
 void clear_layer(const int _id) {
 	for (size_t x = 0; x < TOTAL_MATRIX_WIDHT; x++)
 	{
@@ -340,15 +340,12 @@ void clear_layer(const int _id) {
 		}
 	}
 }
-
-
 void clear_all_layers() {
   for (size_t i = 0; i < COUNT_OF_LAYERS; i++)
   {
     clear_layer(i);
   }
 }
-
 void clear_output_layer() {
   for (size_t x = 0; x < VISIBLE_MATRIX_WITH; x++)
   {
@@ -376,20 +373,16 @@ void  show_specific_layer(const int _id) {
   }
   show_output_layer();
 }
-inline void set_layer_color(const int _layer, const FRM_ANCHOR* _pos, const FRM_COLOR _color) {
-	layers[_layer][_pos->x + VISIBLE_MATRIX_WITH][_pos->y + VISIBLE_MATRIX_HEIGHT].set_color(_color);
+inline void set_layer_color(const int _layer, const FRM_ANCHOR* _pos, const unsigned int  _color) {
+	layers[_layer][_pos->x + VISIBLE_MATRIX_WITH][_pos->y + VISIBLE_MATRIX_HEIGHT] = _color;
 }
-inline void set_layer_color(const int _layer, const unsigned int _x, const unsigned int _y, const FRM_COLOR _color) {
-	layers[_layer][_x + VISIBLE_MATRIX_WITH][_y + VISIBLE_MATRIX_HEIGHT].set_color(_color);
+inline void set_layer_color(const int _layer, const unsigned int _x, const unsigned int _y, const unsigned int _color) {
+	layers[_layer][_x + VISIBLE_MATRIX_WITH][_y + VISIBLE_MATRIX_HEIGHT] = _color;
 }
 
 
 
 
-void load_animation_to_layer(const FRM_ANIMATION* _animation_to_load, FRM_COLOR* _dest_layer, const int _frame_to_load){
-  //get info
-  //load from sram direcly to layer
-}
 
 
 
@@ -409,80 +402,48 @@ void setup()
   output_layer_intense = 1.0f;
 #endif // ENABLE_OUTPUT_INTENSE
 
-/*
-  Serial.print("Initializing SD card...");
 
-  File printFile;
-  String buffer;
-  boolean SDfound;
-
-
-  if (SDfound == 0) {
-	  if (!SD.begin(SD_CARD_CS_PIN)) {
-		  Serial.print("The SD card cannot be found");
-		  while (1);
-	  }
+  //INIT SRAM WITH DEFAUlT VALUES
+  Serial.println("INIT SRAM");
+  for (size_t i = 0; i < SRAM_MAX_SIZE; i++) {
+	  spiRam.write_byte(i, (unsigned char)SRAM_INIT_BYTE);
   }
-  SDfound = 1;
-  printFile = SD.open("Part1.txt");
-
-  if (!printFile) {
-	  Serial.print("The text file cannot be opened");
-	  while (1);
+  Serial.println("GENERATE SAMPLE EEPROM DATA");
+  for(int i = 0; i < 64; i++){
+   EEPROM.write(i, i);
   }
 
-  while (printFile.available()) {
-	  buffer = printFile.readStringUntil('\n');
-	  Serial.println(buffer); //Printing for debugging purpose
-							  //do some action here
+  //COPY TEST FRAME FROM EEPROM TO SRAM
+
+  int frame_mult = 1;
+  for (size_t i = 0; i < 64; i++)
+  {
+	  byte read_eeprom = EEPROM.read(64-i);
+	  spiRam.write_byte(i + (frame_mult * 64), read_eeprom);
   }
-
-  printFile.close();
-*/
-
-  /*
-  TODO
-  load alle .anim files from sdcard to sram chip
-  ->get file size
-  ->malloc filesize
-  ->write buffer to ram
-  ->set offest/filename/size/frames from animation in anim struct
-  ->delte buffer
-  add a func to animation struct that loads the data to a layer an play them
+  frame_mult = 2;
+  for (size_t i = 0; i < 64; i++)
+  {
+	  byte read_eeprom = EEPROM.read(i);
+	  spiRam.write_byte(i + (frame_mult * 64), read_eeprom);
+  }
+  //NOW WE HAVE TWO FRAMES LOADED INTO THE SPI RAM
+  //0-63 FRAME 0
+  // 64-127 FRAME 1
 
 
-  */
 
-//INIT SRAM WITH DEFAUlT VALUES
-Serial.println("INIT SRAM");
-for (size_t i=0; i < SRAM_MAX_SIZE; i++) {
-      spiRam.write_byte(i, (unsigned char)SRAM_INIT_BYTE);
-}
 
-Serial.println("write SRAM");
-int test = (8*8*3);
-for (size_t i=0; i < test; i+=3) {
-      spiRam.write_byte(i, 3);
-}
+
 
 Serial.println("read SRAM");
-for (size_t i=0; i < test; i++) {
-     set_layer_color(0,(i % 8),(64/i), color_lookup_table[spiRam.read_byte(i)]);
+for (size_t i=0; i < 64; i++) {
+	Serial.println(spiRam.read_byte(i));
+    // set_layer_color(0,(i % 8),(64/i), color_lookup_table[spiRam.read_byte(i)]);
 }
 
 
-  /* add setup code here */
-  //LOAD FIRST ANIMATION
- // for (size_t x = 0; x < 8; x++)
- // {
-//	  for (size_t y = 0; y < 8; y++)
-//	  {
 
-	//	  set_layer_color(0, x, y, rain[loaded_animation][x][y]);
-	//	  set_layer_color(1, x, y, rain[loaded_animation+1][x][y]);
-
-	  //}
- // }
   generate_output_layer();
   show_output_layer();
 }
@@ -494,43 +455,9 @@ void loop(){
 
 
 
-return;
-/*
-	if (dir) {
-		fade += steps;
-	}
-	else {
-		fade -= steps;
-	}
 
-
-		   layer_intense[0] = 1.0f - fade;
-		   layer_intense[1] = 0.0f + fade;
-
-
-		   if ((fade >= 0.9f && dir) || (fade <= 0.1f && !dir)) {
-			   dir = !dir;
-
-			   loaded_animation++;
-			   if (loaded_animation > 2) {
-				   loaded_animation = 0;
-			   }
-			   clear_layer(1);
-			   clear_layer(0);
-			   for (size_t x = 0; x < 8; x++)
-			   {
-				   for (size_t y = 0; y < 8; y++)
-				   {
-
-					   set_layer_color(0, x, y, rain[loaded_animation][x][y]);
-					   set_layer_color(1, x, y, rain[loaded_animation + 1][x][y]);
-
-				   }
-			   }
-
-		   }
 		   generate_output_layer();
 		   show_output_layer();
-		   delay(70);
-*/
+		   delay(500);
+
 }
