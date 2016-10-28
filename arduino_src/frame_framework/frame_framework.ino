@@ -429,7 +429,11 @@ void setup()
 #ifdef ENABLE_OUTPUT_INTENSE
   output_layer_intense = 1.0f;
 #endif // ENABLE_OUTPUT_INTENSE
+  generate_output_layer();
+  show_output_layer();
 
+
+  delay(1000);
 
   //INIT SRAM WITH DEFAUlT VALUES
   Serial.println("INIT SRAM");
@@ -454,15 +458,10 @@ void setup()
   int frame_mult = 1;
   for (size_t i = 0; i < 64; i++)
   {
-	  byte read_eeprom = EEPROM.read(64-i);
-	  spiRam.write_byte(i + (frame_mult * 64), read_eeprom);
+	 // byte read_eeprom = EEPROM.read(64-i);
+	  spiRam.write_byte(i, 3);
   }
-  frame_mult = 2;
-  for (size_t i = 0; i < 64; i++)
-  {
-	  byte read_eeprom = EEPROM.read(i);
-	  spiRam.write_byte(i + (frame_mult * 64), read_eeprom);
-  }
+
   //NOW WE HAVE TWO FRAMES LOADED INTO THE SPI RAM
   //0-63 FRAME 0
   // 64-127 FRAME 1
@@ -470,12 +469,13 @@ void setup()
 
 
 
-  layer_intense[0] = 0.5f;
+ 
 
 Serial.println("read SRAM");
 for (size_t i=0; i < 64; i++) {
-	Serial.println(spiRam.read_byte(i));
-	layers[0][(i % 8)][(8 / i)] = i;
+
+
+	layers[0][(i % 8)][(i/8)] = spiRam.read_byte(i);
 }
 
 
