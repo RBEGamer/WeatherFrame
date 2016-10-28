@@ -19,13 +19,17 @@
 //YOU CAN DEFINE HERE YOUR MATRIX SETUP
 #define MATRIX_ORIGIN_LEFT_UP // where is your origin corner MATRIX_ORIGIN_LEFT_UP MATRIX_ORIGIN_LEFT_DOWN MATRIX_ORIGIN_RIGHT_UP MATRIX_ORIGIN_RIGHT_DOWN
 #define MATRIX_MODE_ROW // is your setup MATRIX_MODE_ROW or MATRIX_MODE_COLLUM if not you can enable the USE_LED_LOOKUP feature below
-#define COUNT_OF_LAYERS 1 //SET LAYER COUNT HERE WATCH YOUR RAM
+#define COUNT_OF_LAYERS 2 //SET LAYER COUNT HERE WATCH YOUR RAM
 #define LED_COLOR_MODE_RGB // DEFAULT RGB RBG BGR BRG GBR GRB
 #define ENABLE_OUTPUT_INTENSE //enables a additional intense multiplier to the output layer
-
+//#define ENABLE_LAYER_MOVEMENT
 
 //CONST DEFINES
+#ifdef ENABLE_LAYER_MOVEMENT
+#define MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR 3 // must be 3 or 1 if you choose one you cant move outside the visible area
+#else
 #define MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR 1 // must be 3 or 1 if you choose one you cant move outside the visible area
+#endif // ENABLE_LAYER_MOVEMENT
 #define LED_COUNT (VISIBLE_MATRIX_WITH*VISIBLE_MATRIX_HEIGHT)
 #define TOTAL_MATRIX_WIDHT (MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR * VISIBLE_MATRIX_WITH)
 #define TOTAL_MATRIX_HEIGHT (MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR * VISIBLE_MATRIX_HEIGHT)
@@ -101,15 +105,17 @@ class FRM_COLOR
       g = max_on - g;
       b = max_on - b;
     }
-    inline void set_color(FRM_COLOR_TYPE _r, FRM_COLOR_TYPE _g, FRM_COLOR_TYPE _b) {
+    inline void set_color(FRM_COLOR_TYPE _r, FRM_COLOR_TYPE _g, FRM_COLOR_TYPE _b,unsigned int _color_id) {
       r = _r;
       g = _g ;
       b = _b ;
+	  responding_color_id = _color_id;
     }
-    void set_color(FRM_COLOR _c) {
+    void set_color(FRM_COLOR _c, unsigned int _color_id) {
       r = _c.r ;
       g = _c.g ;
       b = _c.b ;
+	  responding_color_id = _color_id;
     }
     inline FRM_COLOR_TYPE get_r(){
       return r;
@@ -170,6 +176,13 @@ const FTC color_lookup_table[64] = { FTC(124,124,124),FTC(0,0,252),FTC(0,0,188),
 #endif
 
 
+//func deklare
+void show_output_layer();
+
+//_--------------------VARS
+
+
+
 
 
 float layer_intense[COUNT_OF_LAYERS];
@@ -223,7 +236,7 @@ FRM_ANIMATION::~FRM_ANIMATION()
 #ifdef __AVR__
 #include <avr/power.h>
 #endif
-Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(TOTAL_MATRIX_CELL_COUNT, WS2812_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(64, WS2812_PIN, NEO_GRB + NEO_KHZ800);
 
 #include <SPI.h>
 #include <EEPROM.h>
@@ -308,18 +321,19 @@ led_matrix.setPixelColor(led_id, _color->g, _color->r, _color->b);
 led_matrix.setPixelColor(led_id, _color->r, _color->g, _color->b);
 #endif
 }
-void generate_output_layer() {
+void generate_output_layer(bool _direct_show = false) {
+	Serial.println("gen output layer");
     for (size_t w = 0; w < VISIBLE_MATRIX_WITH; w++) {
       for (size_t h = 0; h < VISIBLE_MATRIX_HEIGHT; h++) {
-        output_layer[w][h].set_color(clear_color);
+        output_layer[w][h].set_color(clear_color, clear_color_id);
 
         for(size_t _i = 0; _i < COUNT_OF_LAYERS; _i++){
           size_t i =  _i;//REMOVE THAT SHIT
             #if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 1
-	            if (!layers[i][w ][h ].equals(output_layer[w][h]) && !layers[i][w][h] == ) {
+	            if (layers[i][w][h] != output_layer[w][h].responding_color_id && layers[i][w][h] != clear_color_id) {
 					//color_lookup_table[
-		            output_layer[w][h].set_color(layers[i][w ][h ].r * layer_intense[i],layers[i][w ][h ].g * layer_intense[i],layers[i][w ][h ].b * layer_intense[i]);
-					output_layer[w][h].responding_color_id = layers[i][w][h];
+					output_layer[w][h].set_color(color_lookup_table[layers[i][w][h]].r * layer_intense[i], color_lookup_table[layers[i][w][h]].g * layer_intense[i], color_lookup_table[layers[i][w][h]].b * layer_intense[i], layers[i][w][h]);
+					//output_layer[w][h].responding_color_id = layers[i][w][h];
               }
             #else
               if (!layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(output_layer[w][h]) && !layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(clear_color)) {
@@ -330,13 +344,17 @@ void generate_output_layer() {
          }
       }
     }
+	if (!_direct_show) {
+		return;
+	}
+	show_output_layer();
 }
 void clear_layer(const int _id) {
 	for (size_t x = 0; x < TOTAL_MATRIX_WIDHT; x++)
 	{
 		for (size_t y = 0; y < TOTAL_MATRIX_HEIGHT; y++)
 		{
-			layers[_id][x][y].set_color(clear_color);
+			layers[_id][x][y] = clear_color_id;
 		}
 	}
 }
@@ -351,7 +369,7 @@ void clear_output_layer() {
   {
     for (size_t y = 0; y < VISIBLE_MATRIX_HEIGHT; y++)
     {
-      output_layer[x][y].set_color(clear_color);
+      output_layer[x][y].set_color(clear_color,clear_color_id);
     }
   }
 }
@@ -368,7 +386,12 @@ void show_output_layer() {
 void  show_specific_layer(const int _id) {
   for (size_t w = 0; w < VISIBLE_MATRIX_WITH; w++) {
     for (size_t h = 0; h < VISIBLE_MATRIX_HEIGHT; h++) {
-      output_layer[w][h].set_color(layers[_id][w + VISIBLE_MATRIX_WITH][h + VISIBLE_MATRIX_HEIGHT]);
+#if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 1
+		output_layer[w][h].set_color(color_lookup_table[layers[_id][w][h]], layers[_id][w][h]);
+#else
+		output_layer[w][h].set_color(color_lookup_table[layers[_id][w + VISIBLE_MATRIX_WITH][h + VISIBLE_MATRIX_HEIGHT]], layers[_id][w + VISIBLE_MATRIX_WITH][h + VISIBLE_MATRIX_HEIGHT]);
+#endif
+      
     }
   }
   show_output_layer();
@@ -390,6 +413,11 @@ void setup()
 {
   Serial.begin(115200);
   led_matrix.begin();
+
+
+
+
+  Serial.println("INIT LAYERS");
   clear_all_layers();
   clear_output_layer();
   //INIT LAYER INTENSES
@@ -408,6 +436,14 @@ void setup()
   for (size_t i = 0; i < SRAM_MAX_SIZE; i++) {
 	  spiRam.write_byte(i, (unsigned char)SRAM_INIT_BYTE);
   }
+
+  Serial.println("INIT EEPROM");
+
+  //if a gpio is high it goes to serial mode with set,<frameoffset>,<pixelid>,<pixelcolor>
+  //copy all data from eeprom to sram all bytes!
+
+
+
   Serial.println("GENERATE SAMPLE EEPROM DATA");
   for(int i = 0; i < 64; i++){
    EEPROM.write(i, i);
@@ -434,12 +470,12 @@ void setup()
 
 
 
-
+  layer_intense[0] = 0.5f;
 
 Serial.println("read SRAM");
 for (size_t i=0; i < 64; i++) {
 	Serial.println(spiRam.read_byte(i));
-    // set_layer_color(0,(i % 8),(64/i), color_lookup_table[spiRam.read_byte(i)]);
+	layers[0][(i % 8)][(8 / i)] = i;
 }
 
 
@@ -456,7 +492,7 @@ void loop(){
 
 
 
-		   generate_output_layer();
+		  // generate_output_layer();
 		   show_output_layer();
 		   delay(500);
 
