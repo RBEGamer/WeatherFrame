@@ -459,7 +459,7 @@ void setup()
   for (size_t i = 0; i < 64; i++)
   {
 	 // byte read_eeprom = EEPROM.read(64-i);
-	  spiRam.write_byte(i, 3);
+	  spiRam.write_byte(i, i%16);
   }
 
   //NOW WE HAVE TWO FRAMES LOADED INTO THE SPI RAM
@@ -475,7 +475,7 @@ Serial.println("read SRAM");
 for (size_t i=0; i < 64; i++) {
 
 
-	layers[0][(i % 8)][(i/8)] = spiRam.read_byte(i);
+//	layers[0][(i % 8)][(i/8)] = spiRam.read_byte(i);
 }
 
 
@@ -485,15 +485,23 @@ for (size_t i=0; i < 64; i++) {
 }
 
 
-
+int c = 0;
 
 void loop(){
 
 
+	//for (size_t i = 0; i < 64; i++) {
 
+
+		//layers[0][(i % 8)][(i / 8)] = c;
+	//}
+	//c++;
+	//if (c > 63) {
+	//	c = 0;
+//	}
 
 		  // generate_output_layer();
-		   show_output_layer();
-		   delay(500);
+		//   show_output_layer();
+		   delay(5000);
 
 }
