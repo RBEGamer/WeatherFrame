@@ -10,7 +10,7 @@
 #define ESP_WLAN_SSID "test_wifi"
 #define ESP_WLAN_KEY "6226054527192856"
 //PINS
-#define WS2812_PIN 5  //SETUP THE LED OUT
+#define WS2812_PIN 8  //SETUP THE LED OUT
 #define SD_CARD_CS_PIN 4
 #define SRAM_CS_PIN 10
 //DEFINE YOUR MATRIX SIZE HERE
@@ -459,7 +459,7 @@ void setup()
   for (size_t i = 0; i < 64; i++)
   {
 	 // byte read_eeprom = EEPROM.read(64-i);
-	  spiRam.write_byte(i, i%16);
+	  spiRam.write_byte(i, i);
   }
 
   //NOW WE HAVE TWO FRAMES LOADED INTO THE SPI RAM
@@ -475,7 +475,7 @@ Serial.println("read SRAM");
 for (size_t i=0; i < 64; i++) {
 
 
-//	layers[0][(i % 8)][(i/8)] = spiRam.read_byte(i);
+	layers[0][(i / 8)][(i%8)] = spiRam.read_byte(i);
 }
 
 
@@ -500,8 +500,8 @@ void loop(){
 	//	c = 0;
 //	}
 
-		  // generate_output_layer();
-		//   show_output_layer();
+		   generate_output_layer();
+		   show_output_layer();
 		   delay(5000);
 
 }
