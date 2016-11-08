@@ -44,8 +44,21 @@ namespace LED_FRAME_BUILDER
 
             colors.Clear();
 
-            
-            StreamReader sr= File.OpenText("nes_color_palette.csv");
+            try
+            {
+                //TODO REMOVE THE TRY SHIT
+                StreamReader sra = File.OpenText("nes_color_palette.csv");
+                sra.Close();
+            }
+            catch (Exception)
+            {
+                FileStream sw = File.Create("nes_color_palette.csv");
+               //TODO ADD SAMPLE COLORS SIME R G B WHITE BLACK
+                sw.Close();
+            }
+
+            StreamReader sr = File.OpenText("nes_color_palette.csv");
+
 
             int count = 0;
             while (true)
@@ -233,6 +246,11 @@ namespace LED_FRAME_BUILDER
                 }
             }
             
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

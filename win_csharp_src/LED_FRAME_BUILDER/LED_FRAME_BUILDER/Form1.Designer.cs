@@ -61,6 +61,7 @@
             this.infoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.copy_frame_data_chbx = new System.Windows.Forms.CheckBox();
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.layers_listbox = new System.Windows.Forms.ListBox();
@@ -73,7 +74,6 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.color_chooser = new System.Windows.Forms.Panel();
             this.matrix_panel = new System.Windows.Forms.Panel();
-            this.copy_frame_data_chbx = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -91,7 +91,7 @@
             this.hilfeToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1077, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(751, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -343,8 +343,20 @@
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(192, 487);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "tabPage1";
+            this.tabPage1.Text = "LAYERS";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // copy_frame_data_chbx
+            // 
+            this.copy_frame_data_chbx.AutoSize = true;
+            this.copy_frame_data_chbx.Checked = true;
+            this.copy_frame_data_chbx.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.copy_frame_data_chbx.Location = new System.Drawing.Point(7, 364);
+            this.copy_frame_data_chbx.Name = "copy_frame_data_chbx";
+            this.copy_frame_data_chbx.Size = new System.Drawing.Size(163, 17);
+            this.copy_frame_data_chbx.TabIndex = 8;
+            this.copy_frame_data_chbx.Text = "COPY LAST_FRAME_DATA";
+            this.copy_frame_data_chbx.UseVisualStyleBackColor = true;
             // 
             // button3
             // 
@@ -455,7 +467,7 @@
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage2.Size = new System.Drawing.Size(192, 487);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabPage2";
+            this.tabPage2.Text = "COLORS";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // color_chooser
@@ -472,29 +484,18 @@
             this.matrix_panel.Size = new System.Drawing.Size(512, 512);
             this.matrix_panel.TabIndex = 2;
             // 
-            // copy_frame_data_chbx
-            // 
-            this.copy_frame_data_chbx.AutoSize = true;
-            this.copy_frame_data_chbx.Checked = true;
-            this.copy_frame_data_chbx.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.copy_frame_data_chbx.Location = new System.Drawing.Point(7, 364);
-            this.copy_frame_data_chbx.Name = "copy_frame_data_chbx";
-            this.copy_frame_data_chbx.Size = new System.Drawing.Size(163, 17);
-            this.copy_frame_data_chbx.TabIndex = 8;
-            this.copy_frame_data_chbx.Text = "COPY LAST_FRAME_DATA";
-            this.copy_frame_data_chbx.UseVisualStyleBackColor = true;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1077, 573);
+            this.ClientSize = new System.Drawing.Size(751, 573);
             this.Controls.Add(this.matrix_panel);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Matrix Frame Builder";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
