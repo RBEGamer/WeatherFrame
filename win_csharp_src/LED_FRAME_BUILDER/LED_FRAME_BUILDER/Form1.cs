@@ -22,9 +22,22 @@ namespace LED_FRAME_BUILDER
 
         List<Color> colors = new List<Color>();
         Color current_chosen_color = new Color();
-        int[,] matrix_color_ids;
+
+
+        struct layer
+        {
+           public  int[,] matrix_cid;
+           public string layer_name;
+        }
+
+        List<layer> layers = new List<layer>();
+
+        int matrix_size_w = 0;
+        int matrix_size_h = 0;
         int current_chosen_color_id = 0;
+        int current_selected_layer = 0;
         const int clear_color_id = 0;
+        int last_selected_layer = 0;
         private void build_color_table()
         {
             //TODO load from color table file ->input excel string
@@ -85,12 +98,20 @@ namespace LED_FRAME_BUILDER
         {
             set_matrix_size_btn.Enabled = false;
             matrix_panel.Controls.Clear();
-            matrix_color_ids = new int[(int)matrix_size_widht.Value,(int)matrix_size_height.Value];
+          //  matrix_color_ids = new int[(int)matrix_size_widht.Value,(int)matrix_size_height.Value];
             int mw_pixel = matrix_panel.Size.Width / (int)matrix_size_widht.Value;
             int mh_pixel = matrix_panel.Size.Height / (int)matrix_size_height.Value;
-            for (int i = 0; i < matrix_size_widht.Value; i++)
+            matrix_size_w = (int)matrix_size_widht.Value;
+            matrix_size_h = (int)matrix_size_height.Value;
+
+            //CREATE LAYER
+            layer first_layer = new layer();
+            first_layer.layer_name = "<defult_name>";
+            first_layer.matrix_cid = new int[(int)matrix_size_widht.Value, (int)matrix_size_height.Value];
+
+            for (int i = 0; i < (int)matrix_size_widht.Value; i++)
             {
-                for (int j = 0; j < matrix_size_height.Value; j++)
+                for (int j = 0; j < (int)matrix_size_height.Value; j++)
                 {
                     PictureBox tmp = new PictureBox();
                     tmp.Size = new Size(mw_pixel, mh_pixel);
@@ -98,12 +119,15 @@ namespace LED_FRAME_BUILDER
                     tmp.Name = "mcell_" + i.ToString() + "_" + j.ToString();
                     tmp.BackColor = Color.Black;
                     matrix_panel.Controls.Add(tmp);
-
                     tmp.Click += click_cell;
-
+                    
+                    first_layer.matrix_cid[i, j] = clear_color_id;
                 }
             }
-
+            first_layer.layer_name =  "layer_" + layers.Count().ToString();
+            layers.Add(first_layer);
+            layers_listbox.Items.Add(first_layer.layer_name);
+            layers_listbox.SelectedIndex = 0;
         }
         private void click_cell(object sender, EventArgs e) //EVENT
         {
@@ -113,7 +137,7 @@ namespace LED_FRAME_BUILDER
                 p.BackColor = current_chosen_color;
                 int pos_w = int.Parse(p.Name.Split('_')[1]);
                 int pos_h = int.Parse(p.Name.Split('_')[2]);
-                matrix_color_ids[pos_w, pos_h] = current_chosen_color_id;
+                layers[current_selected_layer].matrix_cid[pos_w, pos_h] = current_chosen_color_id;
             }
         }
         private void click_color(object sender, EventArgs e) //EVENT
@@ -132,7 +156,7 @@ namespace LED_FRAME_BUILDER
                 {
                     for (int j = 0; j < (int)matrix_size_height.Value; j++)
                     {
-                        matrix_color_ids[i, j] = clear_color_id;
+                         layers[current_selected_layer].matrix_cid[i, j] = clear_color_id;
                     }
                 }
             //}
@@ -146,6 +170,69 @@ namespace LED_FRAME_BUILDER
                     p.BackColor = colors[clear_color_id];
                 }
             }
+        }
+
+        //ADD FRAME BTN
+        private void button2_Click(object sender, EventArgs e)
+        {
+            last_selected_layer = current_selected_layer;
+            layer tmp_layer = new layer();
+            tmp_layer.layer_name = "layer_" + layers.Count.ToString();
+            tmp_layer.matrix_cid = new int[(int)matrix_size_widht.Value, (int)matrix_size_height.Value];
+            layers.Add(tmp_layer);
+            layers_listbox.Items.Add(tmp_layer.layer_name);
+            layers_listbox.SelectedItem = tmp_layer.layer_name;
+
+           
+            current_selected_layer = layers.Count-1;
+            if(copy_frame_data_chbx.Checked)
+            {
+                for (int i = 0; i < (int)matrix_size_widht.Value; i++)
+                {
+                    for (int j = 0; j < (int)matrix_size_height.Value; j++)
+                    {
+                        layers[current_selected_layer].matrix_cid[i, j] = layers[last_selected_layer].matrix_cid[i, j];
+                    }
+                }
+            }
+        }
+
+        //REMOVE FRAME BTN
+        private void button3_Click(object sender, EventArgs e)
+        {
+
+
+        }
+
+
+        //EXPORT
+
+        private void eXPORTToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void layers_listbox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ListBox llistbox = (ListBox)sender;
+            last_selected_layer = current_selected_layer;
+
+            current_selected_layer = llistbox.SelectedIndex;
+            //TODO REPLACE WITH REF IN STRUCT
+            for (int i = 0; i < (int)matrix_size_widht.Value; i++)
+            {
+                for (int j = 0; j < (int)matrix_size_height.Value; j++)
+                {
+                    for (int k = 0; k < matrix_panel.Controls.Count; k++)
+                    {
+                        if (matrix_panel.Controls[k].Name == "mcell_" + i.ToString() + "_" + j.ToString())
+                        {
+                            matrix_panel.Controls[k].BackColor = colors[layers[current_selected_layer].matrix_cid[i, j]];
+                        }
+                    }
+                }
+            }
+            
         }
     }
 }
