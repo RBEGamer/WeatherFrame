@@ -1,7 +1,7 @@
 # WeatherFrame
 A esp2866 powered weaher display.
 It displays the current weather (rain, sun, snow,..) on the 8x8 pixel matrix with an anmimation.
-The animation can be created by an excel sheet.
+The animation can be created by an excel sheet or pc tool (see `src/FRAME_BUILDER_src/`).
 The weather data comes from openweathermap which required an valid api key (but its free :) )
 * Openweathermap support for weatherdata
 * WS2812 LED Matrix Display
@@ -49,7 +49,7 @@ For further build instructions,please see the pictures at /images/
 
 # SOFTWARE SETUP
  * create a free account at http://openweathermap.org and request an api-key
- * download the sketch and open it in the actual Arduino IDE
+ * download the sketch (`/src/arduino_src/frame_framework/frame_framework.ino`) and open it in the actual Arduino IDE
  * paste your api-key at `#define OWM_API_KEY _your_api_key_`
  * set yout city-id (you can find it, if you choose an city at the owm homepage) at `#define OWM_CITY_ID _your_city_id`
  * setup your wifi konfig at `ESP_WLAN_SSID "_your_ssid_"` and `ESP_WLAN_KEY "_your_key_"`
