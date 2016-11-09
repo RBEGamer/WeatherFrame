@@ -77,7 +77,7 @@ For further build instructions,please see the pictures at /images/
  * click File->New to create a 8x8 matrix
 
 
-### INFO ABOUT ANIMATIONS
+### INFO ABOUT ANIMATIONS SRAM PIXELS
  * each animation can have up to 256 frame with a matrix size of 256x256pixels
  * the maximum space for this setup is 256(frames)*256(W)*256(H)*1(COLOR) = 16.284KByte + 8Byte Header but tha wont fit into your SRAM
  * for a typical animation of 5 frames @ 8x8 + Header will requie 328 Byte of SRAM so the SRAM IC can hold up to 99 animations
