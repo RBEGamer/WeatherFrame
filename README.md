@@ -65,14 +65,14 @@ For further build instructions,please see the pictures at /images/
  * if necessary edit the matrix settings (VISIBLE_MATRIX_WITH,VISIBLE_MATRIX_HEIGHT,MATRIX_ORIGIN_LEFT_UP,MATRIX_MODE_ROW)
  * if your leds has no row/collum order you can use a lookuptable for the right id, see the comments at USE_LED_LOOKUP
  
+# COLOR TABLE
+ * the standard color table are located at /tools/nes_color_table.xlsx
+ * the maximum amount of color are 256 (1. ubyte)
+ * to add a color simply add in the nes_color_table_file the rgb values and export it as csv
+ * load the csv to the LED_FRAME_BUILDER and copy the imported string(red cell) to the arduino sketch
+ 
+# ANIMATION SETUP | ADD/EDIT ANIMATIONS
+ * with this tool you can simply create a animation set for the WeatherFrame
+ * open the tool and load a color table (a example table is in /tools/nes_color_table.csv)
+ * click File->New to create a 8x8 matrix
 
-# (OPTIONAL) ANIMATION SETUP
- * you need for every weather state (see the owm api documentation) an _weather_state_.anim ascii file in the root dir of the sd card
- * to create or edit our own animations directly in the .anim file or you use the animation creator tool or the frame_generator excel sheet
- * The colors of the animation are stored in a color lookup table. In the defualt code there are 64 Colors inspired from the NES System :)
-   http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=File:Palette_NTSC.png
- * You can use these color codes to setup a frame for the frames stored in the *.anim file
- * The *.animfile stores the frames row by row, e.g. : _color_code_,_color_code_,...
- * The frames are seperated by a blank line.
- * With the 23K256 whitch has 32768Bytes
- * if you have no more space in your ram then you can define COLOR_TABLE_PROGMEM to move the color tbale to your flash
