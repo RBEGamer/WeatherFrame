@@ -16,11 +16,11 @@ For further build instructions,please see the pictures at /images/
  * 64 3D Printed single_frame.stl Parts
  * Nodemcu V3 or an ohter ESP2866 Board
  * SD Card Reader (for storing the animation files)
- * 23K256 SPI SRAM IC
+ * 23K256 SPI SRAM IC or 23LC1024 for more space
  * Levelshifter 3.3V -> 5V
  * Some Woodparts for the Frame
  * small sd card eg 1Gb for the animation files
- * 25x25x0.2 75% tranparency plexiglass plate
+ * 250x250x3mm 75% tranparency plexiglass plate
  
 # TOOLS
  * 3d printer
