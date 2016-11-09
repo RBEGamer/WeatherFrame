@@ -20,6 +20,7 @@ For further build instructions,please see the pictures at /images/
  * Levelshifter 3.3V -> 5V
  * Some Woodparts for the Frame
  * small sd card eg 1Gb for the animation files
+ * 25x25x0.2 75% tranparency plexiglass plate
  
 # TOOLS
  * 3d printer
