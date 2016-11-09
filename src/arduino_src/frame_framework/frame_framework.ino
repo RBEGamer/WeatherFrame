@@ -1,6 +1,13 @@
 //WeatherFrame Framework C 2016 Marcel Ochsendorf github.com/RBEGamer marcel.ochsendorf@gmail.com marcelochsendorf.com
-
-
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+#include <avr/power.h>
+#endif
+#include <SPI.h>
+#include <EEPROM.h>
+#include <SpiRAM.h>
+#include "SdFat.h"
+#include "FatLib\FatFile.h"
 
 
 //OWM SETTINGS
@@ -23,6 +30,10 @@
 #define LED_COLOR_MODE_RGB // DEFAULT RGB RBG BGR BRG GBR GRB
 #define ENABLE_OUTPUT_INTENSE //enables a additional intense multiplier to the output layer
 //#define ENABLE_LAYER_MOVEMENT
+#define SRAM_IC_23K256 // OR DRAM_IC_23LC1024
+#define _SER_DEBUG_ //ENABE SERIAL DEBUGGIN
+
+
 
 //CONST DEFINES
 #ifdef ENABLE_LAYER_MOVEMENT
@@ -191,7 +202,7 @@ float output_layer_intense = 1.0f;
 #endif // ENABLE_OUTPUT_INTENSE
 
 
-unsigned int layers[COUNT_OF_LAYERS][TOTAL_MATRIX_WIDHT][TOTAL_MATRIX_HEIGHT]; //our layers
+byte layers[COUNT_OF_LAYERS][TOTAL_MATRIX_WIDHT][TOTAL_MATRIX_HEIGHT]; //our layers
 FRM_COLOR output_layer[VISIBLE_MATRIX_WITH][VISIBLE_MATRIX_HEIGHT]; //the final layer to draw
 //CONST COLORS
 const FRM_COLOR clear_color = FRM_COLOR(0, 0, 0);
@@ -232,24 +243,31 @@ FRM_ANIMATION::~FRM_ANIMATION()
 
 
   /*LED VARS*/
-#include <Adafruit_NeoPixel.h>
-#ifdef __AVR__
-#include <avr/power.h>
-#endif
-Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(64, WS2812_PIN, NEO_GRB + NEO_KHZ800);
-
-#include <SPI.h>
-#include <EEPROM.h>
 
 
-//SRAM FILES
-#include <SpiRAM.h>
-SpiRAM spiRam(0, SRAM_CS_PIN);
+
+//LED DEFINES
+Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(TOTAL_MATRIX_CELL_COUNT, WS2812_PIN, NEO_GRB + NEO_KHZ800);
+//SRAM
+#ifdef SRAM_IC_23K256
 #define SRAM_MAX_SIZE 32768
-#define SRAM_INIT_BYTE 0
+#endif
+#ifdef SRAM_IC_23LC1024
+#define SRAM_MAX_SIZE 1048576
+#endif
+#define SRAM_INIT_BYTE (byte)0 //the cast if you want >127
+SpiRAM spiRam(0, SRAM_CS_PIN);
 
-//STORE VARS
-//byte sd_readed_file_buffer* = NULL;
+//SRAM HELPER FUNCTIONS
+inline unsigned char read_spi_ram(SpiRAM* _sram, unsigned int _addr) {
+	return (unsigned char)_sram->read_byte((int)_addr);
+}
+inline void write_spi_ram(SpiRAM* _sram, unsigned int _addr, unsigned char _value) {
+	_sram->write_byte(_addr, (char)_value);
+}
+
+
+
 
 
 //GET LED
@@ -322,7 +340,9 @@ led_matrix.setPixelColor(led_id, _color->r, _color->g, _color->b);
 #endif
 }
 void generate_output_layer(bool _direct_show = false) {
-	Serial.println("gen output layer");
+#ifdef _SER_DEBUG_
+	Serial.println(F("gen output layer"));
+#endif
     for (size_t w = 0; w < VISIBLE_MATRIX_WITH; w++) {
       for (size_t h = 0; h < VISIBLE_MATRIX_HEIGHT; h++) {
         output_layer[w][h].set_color(clear_color, clear_color_id);
@@ -349,6 +369,7 @@ void generate_output_layer(bool _direct_show = false) {
 	}
 	show_output_layer();
 }
+
 void clear_layer(const int _id) {
 	for (size_t x = 0; x < TOTAL_MATRIX_WIDHT; x++)
 	{
@@ -417,7 +438,9 @@ void setup()
 
 
 
-  Serial.println("INIT LAYERS");
+#ifdef _SER_DEBUG_
+  Serial.println(F("INIT LAYERS"));
+#endif
   clear_all_layers();
   clear_output_layer();
   //INIT LAYER INTENSES
@@ -436,42 +459,29 @@ void setup()
   delay(1000);
 
   //INIT SRAM WITH DEFAUlT VALUES
-  Serial.println("INIT SRAM");
+#ifdef _SER_DEBUG_
+  Serial.println(F("INIT SRAM"));
+#endif
   for (size_t i = 0; i < SRAM_MAX_SIZE; i++) {
-	  spiRam.write_byte(i, (unsigned char)SRAM_INIT_BYTE);
+	  spiRam.write_byte(i, SRAM_INIT_BYTE);
   }
 
-  Serial.println("INIT EEPROM");
+#ifdef _SER_DEBUG_
+  Serial.println(F("INIT SD CARD"));
+#endif
 
   //if a gpio is high it goes to serial mode with set,<frameoffset>,<pixelid>,<pixelcolor>
   //copy all data from eeprom to sram all bytes!
 
 
 
-  Serial.println("GENERATE SAMPLE EEPROM DATA");
-  for(int i = 0; i < 64; i++){
-   EEPROM.write(i, i);
-  }
-
-  //COPY TEST FRAME FROM EEPROM TO SRAM
-
-  int frame_mult = 1;
-  for (size_t i = 0; i < 64; i++)
-  {
-	 // byte read_eeprom = EEPROM.read(64-i);
-	  spiRam.write_byte(i, i);
-  }
-
-  //NOW WE HAVE TWO FRAMES LOADED INTO THE SPI RAM
-  //0-63 FRAME 0
-  // 64-127 FRAME 1
+ 
 
 
 
 
  
 
-Serial.println("read SRAM");
 for (size_t i=0; i < 64; i++) {
 
 
