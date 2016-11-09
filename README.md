@@ -33,51 +33,52 @@ For further build instructions,please see the pictures at /images/
  * latest Arduino IDE
  * SPI-SRAM Libary : http://playground.arduino.cc/Main/SpiRAM
  * Adafruit-NeoPixel Libary : https://github.com/adafruit/Adafruit_NeoPixel
+ * SDFat Libary : https://github.com/greiman/SdFat
  
 # BUILD INSTRUCTION
- * Print all needed 3D Parts at the /3d_parts/ directory 
- * 64x single_frame.stl but this depent on your matrix size
- * glue all singe_frame pieces together (see at /images/)
+ * Print all needed 3D Parts at the ´/3d_parts/´ directory 
+ * 64x ´single_frame.stl´ but this depent on your matrix size
+ * glue all singe_frame pieces together (see ´/images/´)
  * glue the leds int the holes of your glued matrix
  * wire your leds up (DO -> DI, GND->GND, V+ -> V+)
- * connect the DI of your first LED with pin 5 of the ESP (see the WS2812_PIN define)
- * connect the SDCard reader with ESP SPI Bus and the CS pin to pin 5 (see the SD_CARD_CS_PIN define)
- * connect the SRAM Chip to the SPI Bus and the CS pin to pin 3 (see the SRAM_CS_PIN define)
- * glue the ESP,SDCARD,SRAM IC to the back of your matri
+ * connect the DI of your first LED with pin 5 of the ESP (see the ´WS2812_PIN define´)
+ * connect the SDCard reader with ESP SPI Bus and the CS pin to pin 5 (see the ´SD_CARD_CS_PIN define´)
+ * connect the SRAM Chip to the SPI Bus and the CS pin to pin 3 (see the ´SRAM_CS_PIN define´)
+ * glue the ESP, SDCARD, SRAM IC to the back of your matri
  * upload the firmware
 
 # SOFTWARE SETUP
  * create a free account at http://openweathermap.org and request an api-key
  * download the sketch and open it in the actual Arduino IDE
- * paste your api-key at #define OWM_API_KEY _your_api_key_
- * set yout city-id (you can find it, if you choose an city at the owm homepage) at #define OWM_CITY_ID _your_city_id
- * setup your wifi konfig at ESP_WLAN_SSID "_your_ssid_" and ESP_WLAN_KEY "_your_key_"
+ * paste your api-key at ´#define OWM_API_KEY _your_api_key_´
+ * set yout city-id (you can find it, if you choose an city at the owm homepage) at ´#define OWM_CITY_ID _your_city_id´
+ * setup your wifi konfig at ´ESP_WLAN_SSID "_your_ssid_"´ and ´ESP_WLAN_KEY "_your_key_"´
  * upload the sketch
  
 # SD CARD SETUP
- * download the sample SDCard image from this rep located at /owm_animations.img
+ * download the sample SDCard image from this rep located at ´/owm_animations.img´
  * burn the image to your SD Card use WinDiskImager(WIN), DiskUtility(MAC), Terminal(Unix)
  * put the card to the slot of your WeatherFrame
  
  
 # (OPTIONAL) SOFTWARE SETUP
- * if necessary edit the pin-config (WS2812_PIN, SD_CARD_CS_PIN, SRAM_CS_PIN)
- * if necessary edit the matrix settings (VISIBLE_MATRIX_WITH,VISIBLE_MATRIX_HEIGHT,MATRIX_ORIGIN_LEFT_UP,MATRIX_MODE_ROW)
- * if your leds has no row/collum order you can use a lookuptable for the right id, see the comments at USE_LED_LOOKUP
+ * if necessary edit the pin-config (´WS2812_PIN´, ´SD_CARD_CS_PIN´, ´SRAM_CS_PIN´)
+ * if necessary edit the matrix settings (´VISIBLE_MATRIX_WITH´, ´VISIBLE_MATRIX_HEIGHT´, ´MATRIX_ORIGIN_LEFT_UP´, ´MATRIX_MODE_ROW´)
+ * if your leds has no row/collum order you can use a lookuptable for the right id, see the comments at ´USE_LED_LOOKUP´
  
 # COLOR TABLE
- * the standard color table are located at /tools/nes_color_table.xlsx
+ * the standard color table are located at ´/tools/nes_color_table.xlsx´
  * the maximum amount of color are 256 (1. ubyte)
  * to add a color simply add in the nes_color_table_file the rgb values and export it as csv
- * load the csv to the LED_FRAME_BUILDER and copy the imported string(red cell) to the arduino sketch
+ * load the csv to the LED_FRAME_BUILDER and copy the imported string (red cell) to the arduino sketch
  
 # ANIMATION SETUP | ADD/EDIT ANIMATIONS
  * with this tool you can simply create a animation set for the WeatherFrame
- * open the tool and load a color table (a example table is in /tools/nes_color_table.csv)
+ * open the tool and load a color table (a example table is in ´/tools/nes_color_table.csv´)
  * click File->New to create a 8x8 matrix
 
 
 ### INFO ABOUT ANIMATIONS SRAM PIXELS
- * each animation can have up to 256 frame with a matrix size of 256x256pixels
- * the maximum space for this setup is 256(frames)*256(W)*256(H)*1(COLOR) = 16.284KByte + 8Byte Header but tha wont fit into your SRAM
- * for a typical animation of 5 frames @ 8x8 + Header will requie 328 Byte of SRAM so the SRAM IC can hold up to 99 animations
+ * each animation can have up to 256 frame with a matrix size of `256x256` pixels
+ * the maximum space for this setup is `256(frames)*256(W)*256(H)*1(COLOR)+ 256(FRAMES)*5(HEADER) = 17.564KByte`  but tha wont fit into your SRAM
+ * for a typical animation of 5 frames @ 8x8 pixel + Header will require 328 Byte of SRAM so the 32K256 IC can hold up to 99 animations
