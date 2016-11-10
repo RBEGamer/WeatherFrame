@@ -12,15 +12,18 @@ For further build instructions,please see the pictures at /images/
 
 
 # PARTS (FOR 8x8 FRAME)
- * 64 WS2812 LEDs
- * 64 3D Printed single_frame.stl Parts
+ * 64x WS2812 LEDs
+ * 64x 3D Printed single_frame.stl Parts
  * Nodemcu V3 or an ohter ESP2866 Board
- * SD Card Reader (for storing the animation files)
- * 23K256 SPI SRAM IC or 23LC1024 for more space
- * Levelshifter 3.3V -> 5V
- * Some Woodparts for the Frame
- * small sd card eg 1Gb for the animation files
- * 250x250x3mm 75% tranparency plexiglass plate
+ * 23K256 or 23LC1024 SRAM IC
+ * Levelshifter 3.3V -> 5V 4 channel
+ * SD Card breakooutboard
+ * Some Wooden parts for the Frame
+ * small sd card eg 1Gb
+ * 250x250x3mm 75% tranparency acryl plate (FRONT_PLATE)
+ * 250x250x3mm black acryl plate (BACK_PLATE)
+ * jumperwires
+ * 3x 6mm push buttons
  
 # TOOLS
  * 3d printer
@@ -28,6 +31,8 @@ For further build instructions,please see the pictures at /images/
  * Wires
  * Plasicglue and/or hotglue
  * Solder stuff
+ * SD CARD Reader
+ * Drill 6mm
 
 # NEEDED SOFTWARE
  * latest Arduino IDE
@@ -75,10 +80,13 @@ For further build instructions,please see the pictures at /images/
 # ANIMATION SETUP | ADD/EDIT ANIMATIONS
  * with this tool you can simply create a animation set for the WeatherFrame
  * open the tool and load a color table (a example table is in `/tools/nes_color_table.csv`)
- * click File->New to create a 8x8 matrix
+ * click File->New to create a 8x8 matrix (you can edit the size at the `SIZE TAB`)
 
 
 ### INFO ABOUT ANIMATIONS SRAM PIXELS
  * each animation can have up to 256 frame with a matrix size of ´256x256´ pixels
  * the maximum space for this setup is `256(frames)*256(W)*256(H)*1(COLOR)+ 256(FRAMES)*5(HEADER) = 17.564KByte`  but that wont fit into your SRAM
  * for a typical animation of 5 frames @ 8x8 pixel + Header will require 328 Byte of SRAM so the 32K256 IC can hold up to 99 animations
+
+# TODO
+For the TODO list see `TODOList.md`
