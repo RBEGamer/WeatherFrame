@@ -2,7 +2,6 @@
 
 ## DOCU
 * git pfade anpassen
-* git ignore *.DSStore
 
 
 ## ARD SRC
