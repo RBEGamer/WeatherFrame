@@ -4,10 +4,7 @@
 #include <avr/power.h>
 #endif
 #include <SPI.h>
-#include <EEPROM.h>
-#include <SpiRAM.h>
-#include "SdFat.h"
-#include "FatLib\FatFile.h"
+#include <SD.h>
 //SYSTEM DEFINES
 #define _PLATTFORM_ESP_ //ARE THIS SKETCH IS RUNNING ON A EPS ? 
 #ifdef _PLATTFORM_ESP_
@@ -16,22 +13,13 @@
 //#define byte unsigned char;
 
 
-//OWM SETTINGS
-#define OWM_API_KEY "94c8538b04c8c03552d3a6ccc4deb01c"
-#define OWM_CITY_ID "3247449" //AACHEN
-//WLAN SETTINGS
-#define ESP_WLAN_SSID "test_wifi"
-#define ESP_WLAN_KEY "6226054527192856"
+
 //PINS
-#ifdef _PLATTFORM_ESP_
-#define WS2812_PIN D16
-#define SD_CARD_CS_PIN D5
-#define SRAM_CS_PIN D4
-#else //ARDUINO PINS
-#define WS2812_PIN D8
-#define SD_CARD_CS_PIN D4
-#define SRAM_CS_PIN D10
-#endif
+//ARDUINO PINS
+#define WS2812_PIN 5
+#define SD_CARD_CS_PIN 4
+
+
 //DEFINE YOUR MATRIX SIZE HERE
 #define VISIBLE_MATRIX_WITH 8 //WIDTH
 #define VISIBLE_MATRIX_HEIGHT 8 //HEIGHT
@@ -42,7 +30,7 @@
 #define LED_COLOR_MODE_RGB // DEFAULT RGB RBG BGR BRG GBR GRB
 #define ENABLE_OUTPUT_INTENSE //enables a additional intense multiplier to the output layer
 //#define ENABLE_LAYER_MOVEMENT
-#define SRAM_IC_23K256 // OR DRAM_IC_23LC1024
+#define RAM_SIZE 2048
 #define _SER_DEBUG_ //ENABE SERIAL DEBUGGIN
 
 
@@ -184,7 +172,6 @@ class FRM_ANCHOR
 };
 #endif
 
-
 //COLOR PALETTE
 //if you define COLOR_TABLE_PROGMEM the color table will be stored in the flash memory so it can be slower
 #define COLOR_TABLE_PROGMEM
@@ -251,38 +238,82 @@ FRM_ANIMATION::~FRM_ANIMATION()
 #endif
 
 
-
-  /*LED VARS*/
-
-
-
 //LED DEFINES
 Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(TOTAL_MATRIX_CELL_COUNT, WS2812_PIN, NEO_GRB + NEO_KHZ800);
-//SRAM
-#ifdef SRAM_IC_23K256
-#define SRAM_MAX_SIZE 32768
+
+
+//DEMO RAM
+#ifndef DEMO_RAM
+#define DEMO_RAM
+#define DEMO_RAM_SIZE 2048
+unsigned char demo_ram[DEMO_RAM_SIZE];
+inline void write_to_ram(unsigned int _addr, unsigned char _value) {
+	if (_addr > DEMO_RAM_SIZE - 1) {
+#ifdef _SER_DEBUG_
+		Serial.println(F("DEMO RAM - OUT OF RANGE"));
 #endif
-#ifdef SRAM_IC_23LC1024
-#define SRAM_MAX_SIZE 1048576
+	}
+	else {
+		demo_ram[_addr] = _value;
+	}
+	}
+inline unsigned char read_from_ram(unsigned int _addr) {
+	if (_addr > DEMO_RAM_SIZE - 1) {
+#ifdef _SER_DEBUG_
+		Serial.println(F("DEMO RAM - OUT OF RANGE"));
 #endif
-#define SRAM_INIT_BYTE (byte)0 //the cast if you want >127
-SpiRAM spiRam(0, SRAM_CS_PIN);
-
-//SRAM HELPER FUNCTIONS
-inline unsigned char read_spi_ram(SpiRAM* _sram, unsigned int _addr) {
-	return (unsigned char)_sram->read_byte((int)_addr);
+		return NULL;
+	}
+	return demo_ram[_addr];
 }
-inline void write_spi_ram(SpiRAM* _sram, unsigned int _addr, unsigned char _value) {
-	_sram->write_byte(_addr, (char)_value);
+void init_ram() {
+	for (int i = 0; i < DEMO_RAM_SIZE; i++) {
+
+		demo_ram[i] = 0;
+	}
+}
+#endif // !DEMO_RAM
+
+String getValue(String data, char separator, int index)
+{
+	int found = 0;
+	int strIndex[] = {
+		0, -1 };
+	int maxIndex = data.length() - 1;
+	for (int i = 0; i <= maxIndex && found <= index; i++) {
+		if (data.charAt(i) == separator || i == maxIndex) {
+			found++;
+			strIndex[0] = strIndex[1] + 1;
+			strIndex[1] = (i == maxIndex) ? i + 1 : i;
+		}
+	}
+	return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
 
+//FRAME PARSE INFO
+struct SD_FRAME_HEADER {
+	unsigned char animation_id;
+	unsigned char frame_curr;
+	unsigned char  frame_max;
+	unsigned char frame_data_w;
+	unsigned char frame_data_h;
+	void print_header() {
+		Serial.print(F("FRAME_HEADER FOR ANIMATION:")); Serial.print(animation_id); Serial.print(F(" CURR:")); Serial.print(frame_curr); Serial.print(F(" FROM : ")); Serial.print(frame_max); Serial.print(F(" W : ")); Serial.print(frame_data_w); Serial.print(F(" H : ")); Serial.println(frame_data_h);
+	}
 
+	void read_ram(const int _start_addr) {
+		animation_id = read_from_ram(_start_addr + 0);
+		frame_curr = read_from_ram(_start_addr + 1);
+		frame_max = read_from_ram(_start_addr + 2);
+		frame_data_w = read_from_ram(_start_addr + 3);
+		frame_data_h = read_from_ram(_start_addr + 4);
+	}
 
+};
 
 //GET LED
-//SET LED COLOR WITH #defined LOOKUPTABLE
-inline void set_led_color(FRM_ANCHOR _pos, FRM_COLOR* _color) {
+inline void set_led_color( FRM_ANCHOR _pos,  FRM_COLOR* _color) {
   unsigned int led_id = 0;
   //CHECK IF POINT IS IN RANGE
 #ifdef MATRIX_ORIGIN_LEFT_UP
@@ -349,7 +380,7 @@ led_matrix.setPixelColor(led_id, _color->g, _color->r, _color->b);
 led_matrix.setPixelColor(led_id, _color->r, _color->g, _color->b);
 #endif
 }
-void generate_output_layer(bool _direct_show = false) {
+void generate_output_layer(const bool _direct_show = false) {
 #ifdef _SER_DEBUG_
 	Serial.println(F("gen output layer"));
 #endif
@@ -363,7 +394,7 @@ void generate_output_layer(bool _direct_show = false) {
 	            if (layers[i][w][h] != output_layer[w][h].responding_color_id && layers[i][w][h] != clear_color_id) {
 					//color_lookup_table[
 					output_layer[w][h].set_color(color_lookup_table[layers[i][w][h]].r * layer_intense[i], color_lookup_table[layers[i][w][h]].g * layer_intense[i], color_lookup_table[layers[i][w][h]].b * layer_intense[i], layers[i][w][h]);
-					//output_layer[w][h].responding_color_id = layers[i][w][h];
+					output_layer[w][h].responding_color_id = layers[i][w][h];
               }
             #else
               if (!layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(output_layer[w][h]) && !layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(clear_color)) {
@@ -379,7 +410,6 @@ void generate_output_layer(bool _direct_show = false) {
 	}
 	show_output_layer();
 }
-
 void clear_layer(const int _id) {
 	for (size_t x = 0; x < TOTAL_MATRIX_WIDHT; x++)
 	{
@@ -428,15 +458,163 @@ void  show_specific_layer(const int _id) {
   show_output_layer();
 }
 inline void set_layer_color(const int _layer, const FRM_ANCHOR* _pos, const unsigned int  _color) {
+#if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 3
 	layers[_layer][_pos->x + VISIBLE_MATRIX_WITH][_pos->y + VISIBLE_MATRIX_HEIGHT] = _color;
+#else
+	layers[_layer][_pos->x][_pos->y] = _color;
+#endif
 }
 inline void set_layer_color(const int _layer, const unsigned int _x, const unsigned int _y, const unsigned int _color) {
+#if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 3
 	layers[_layer][_x + VISIBLE_MATRIX_WITH][_y + VISIBLE_MATRIX_HEIGHT] = _color;
+#else
+	layers[_layer][_x ][_y ] = _color;
+#endif
 }
 
 
+void layer_write_to_serial(unsigned int _layer_id) {
 
 
+	for (size_t i = 0; i <TOTAL_MATRIX_WIDHT; i++)
+	{
+		for (size_t j = 0; j < TOTAL_MATRIX_HEIGHT; j++)
+		{
+			Serial.print(layers[_layer_id][i][j]); Serial.print(" ");
+		}
+		Serial.println("");
+	}
+}
+
+void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_start, const byte animation_id_counter, const  unsigned int _animation_start_addr = 0) {
+	//FIRST OPEN FILE TO CHECK EXISTS
+	File myFile;
+	myFile = SD.open(_path);
+
+	if (!myFile) {
+		Serial.println(F("FILE CANNOT BE OPEN"));
+		return;
+	}
+
+	SD_FRAME_HEADER tmp_header;
+	bool frame_started = false;
+	unsigned int next_frame_offset = _animation_start_addr; //yeah startoffset ggf add further header offset
+	unsigned int next_data_offset = next_frame_offset + sizeof(SD_FRAME_HEADER);
+	if (_next_data_start != nullptr) {
+		*_next_data_start = next_data_offset + (1 * 1) * 1;
+	}
+	int row_counter = 0;
+	while (myFile.available()) {
+		//GET CURRENT LINE
+		String tmp_line = "";
+		tmp_line = myFile.readStringUntil('\n');
+		//Serial.println(tmp_line);
+		//CHECK FOR LINE TYPE
+		if (tmp_line.indexOf("_") > 0) {
+
+			tmp_header.frame_curr = getValue(tmp_line, '_', 1).toInt();
+			tmp_header.frame_max = getValue(tmp_line, '_', 2).toInt();
+			tmp_header.frame_data_w = getValue(tmp_line, '_', 3).toInt();
+			tmp_header.frame_data_h = getValue(tmp_line, '_', 4).toInt();
+			tmp_header.animation_id = animation_id_counter;
+#ifdef _SER_DEBUG_
+			tmp_header.print_header();
+#endif
+
+			frame_started = true;
+
+			write_to_ram(next_frame_offset + 0, tmp_header.animation_id);
+			write_to_ram(next_frame_offset + 1, tmp_header.frame_curr);
+			write_to_ram(next_frame_offset + 2, tmp_header.frame_max);
+			write_to_ram(next_frame_offset + 3, tmp_header.frame_data_w);
+			write_to_ram(next_frame_offset + 4, tmp_header.frame_data_h);
+		}
+		else if (tmp_line.indexOf(",") > 0) {
+
+
+			for (size_t i = 0; i < tmp_header.frame_data_w; i++)
+			{
+
+				unsigned char read_value = (unsigned char)getValue(tmp_line, ',', i).toInt();
+				write_to_ram(((row_counter * tmp_header.frame_data_w) + i) + next_data_offset, read_value);
+#ifdef _SER_DEBUG_
+				//Serial.print("read cell at "); Serial.print(cell_index); Serial.print(" is "); Serial.println(read_value);
+#endif
+			}
+			row_counter++;
+		}
+		else // if (tmp_line == "" || !myFile.available()) //seems to be an "" line in the cs project i have checked this twice
+		{
+			frame_started = false;
+			next_frame_offset += sizeof(tmp_header) + (tmp_header.frame_data_w* tmp_header.frame_data_h * sizeof(byte));
+			next_data_offset = next_frame_offset + sizeof(SD_FRAME_HEADER);
+			if (_next_data_start != nullptr) {
+				*_next_data_start = next_data_offset + 1;
+			}
+			Serial.print("FRAME FINISH next frame offset is "); Serial.print(next_frame_offset); Serial.print(" NEXT DATA OFFSET IS:"); Serial.println(next_data_offset);
+		}
+
+	}
+	myFile.close();
+}
+void read_frame_to_layer(unsigned int _animation_id, unsigned int _frame_id, unsigned int _layer_id, int additional_offset = 0, SD_FRAME_HEADER* _head = NULL) {
+	Serial.println("----------------------------");
+	SD_FRAME_HEADER tmp;
+	unsigned int  search_offset = 0;
+	tmp.read_ram(search_offset);
+	//tmp.print_header();
+
+	//SEARCH FOR OFFSET
+	while (true)
+	{
+		if (tmp.animation_id == _animation_id && tmp.frame_curr == _frame_id) {
+			Serial.println("FRAME  FOUND");
+			break;
+		}
+		tmp.read_ram(search_offset);
+		if (tmp.animation_id == _animation_id && tmp.frame_curr == _frame_id) {
+			Serial.println("FRAME  FOUND 1");
+			break;
+		}
+		search_offset += sizeof(SD_FRAME_HEADER) + (tmp.frame_data_w*tmp.frame_data_h * sizeof(byte));
+		if (search_offset >= RAM_SIZE) {
+			Serial.println("FRAME NOT FOUND");
+			return;
+		}
+
+
+	};
+	//tmp.print_header();
+	Serial.println(search_offset);
+	//WRITE DATA TO LAYER
+	*_head = tmp;
+	int cell_offset = 0;
+	for (size_t i = 0; i < tmp.frame_data_w; i++)
+	{
+		for (size_t j = 0; j < tmp.frame_data_h; j++)
+		{
+	cell_offset = search_offset+ sizeof(SD_FRAME_HEADER)+ (j*tmp.frame_data_h) + i;
+
+			Serial.print(cell_offset); Serial.print("("); Serial.print(read_from_ram(cell_offset)); Serial.print(") ");
+			if (cell_offset >= RAM_SIZE) {
+				Serial.println("FRAME NOT FOUND");
+				return;
+			}
+			set_layer_color(_layer_id, i, j, read_from_ram(cell_offset));
+		}
+		Serial.println();
+	}
+
+
+	int t = 0;
+}
+
+
+int anim_counter = 0;
+int max_anim = 0;
+
+unsigned long previousMillis = 0;
+const long interval = 1000;
 
 
 
@@ -444,8 +622,6 @@ void setup()
 {
   Serial.begin(115200);
   led_matrix.begin();
-
-
 
 
 #ifdef _SER_DEBUG_
@@ -468,23 +644,30 @@ void setup()
 
   delay(1000);
 
-  //INIT SRAM WITH DEFAUlT VALUES
-#ifdef _SER_DEBUG_
-  Serial.println(F("INIT SRAM"));
-#endif
-  for (size_t i = 0; i < SRAM_MAX_SIZE; i++) {
-	  spiRam.write_byte(i, SRAM_INIT_BYTE);
-  }
+
 
 #ifdef _SER_DEBUG_
   Serial.println(F("INIT SD CARD"));
 #endif
+  init_ram();
+
+  if (!SD.begin(SD_CARD_CS_PIN)) {
+	  Serial.println("initialization failed!");
+	  return;
+  }
+  //LOAD ANIATION TO SD CARD
+  write_sd_animation_to_sram("test.txt", NULL,0, 0);
+
 
   //if a gpio is high it goes to serial mode with set,<frameoffset>,<pixelid>,<pixelcolor>
   //copy all data from eeprom to sram all bytes!
+  SD_FRAME_HEADER tmp;
+  read_frame_to_layer(0, 1, 0, 0, &tmp);
+ // layer_write_to_serial(0);
 
 
 
+  max_anim = tmp.frame_max;
  
 
 
@@ -492,44 +675,46 @@ void setup()
 
  
 
-for (size_t i=0; i < 64; i++) {
 
 
-	layers[0][(i / 8)][(i%8)] = spiRam.read_byte(i);
-}
+	//layers[0][(i / 8)][(i%8)] = spiRam.read_byte(i);
 
 
 
   generate_output_layer();
   show_output_layer();
+
+  delay(100);
 }
 
 
-int c = 0;
+
+
 
 void loop(){
+	return;
+	unsigned long currentMillis = millis();
 
 
-	//for (size_t i = 0; i < 64; i++) {
+		// save the last time you blinked the LED
+		previousMillis = currentMillis;
+		Serial.println("TICK");
+		read_frame_to_layer(0, anim_counter, 0, 0);
+		anim_counter++;
+		if (anim_counter >= max_anim) {
+			anim_counter = 0;
+		}
 
+		generate_output_layer();
+		show_output_layer();
+	
+		delay(500);
 
-		//layers[0][(i % 8)][(i / 8)] = c;
-	//}
-	//c++;
-	//if (c > 63) {
-	//	c = 0;
-//	}
-
-		   generate_output_layer();
-		   show_output_layer();
 		   
 
-#ifdef _PLATTFORM_ESP_
-		   yield(); //to hold wifi stable
-#endif
 
 
 
-		   delay(5000);
+	
 
 }
