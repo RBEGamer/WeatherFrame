@@ -31,6 +31,9 @@
 #define ENABLE_OUTPUT_INTENSE //enables a additional intense multiplier to the output layer
 //#define ENABLE_LAYER_MOVEMENT
 #define RAM_SIZE 2048
+
+
+
 #define _SER_DEBUG_ //ENABE SERIAL DEBUGGIN
 
 
@@ -55,6 +58,10 @@
 #define ANCHOR_X 0
 #define ANCHOR_Y 0
 #endif
+#ifdef DEBUG
+#define _SER_DEBUG_
+#endif // DEBUG
+
 
 //YOU CAN HERE CREATE A LOOKUPTABLE IF YOUR LEDS NOT IN ROW OR COLLUM
 //you can change the led id here if your setup is not collum/row based
@@ -382,7 +389,7 @@ led_matrix.setPixelColor(led_id, _color->r, _color->g, _color->b);
 }
 void generate_output_layer(const bool _direct_show = false) {
 #ifdef _SER_DEBUG_
-	Serial.println(F("gen output layer"));
+	//Serial.println(F("gen output layer"));
 #endif
     for (size_t w = 0; w < VISIBLE_MATRIX_WITH; w++) {
       for (size_t h = 0; h < VISIBLE_MATRIX_HEIGHT; h++) {
@@ -505,13 +512,15 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 	}
 	int row_counter = 0;
 	while (myFile.available()) {
+		
 		//GET CURRENT LINE
 		String tmp_line = "";
 		tmp_line = myFile.readStringUntil('\n');
-		//Serial.println(tmp_line);
+		Serial.println(tmp_line);
 		//CHECK FOR LINE TYPE
 		if (tmp_line.indexOf("_") > 0) {
-
+			//CECK IF FRAME STARTED IF TRUE MAKE THE SAME AS ELSE LINE
+			Serial.println("HEADER LINE");
 			tmp_header.frame_curr = getValue(tmp_line, '_', 1).toInt();
 			tmp_header.frame_max = getValue(tmp_line, '_', 2).toInt();
 			tmp_header.frame_data_w = getValue(tmp_line, '_', 3).toInt();
@@ -522,7 +531,7 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 #endif
 
 			frame_started = true;
-
+		
 			write_to_ram(next_frame_offset + 0, tmp_header.animation_id);
 			write_to_ram(next_frame_offset + 1, tmp_header.frame_curr);
 			write_to_ram(next_frame_offset + 2, tmp_header.frame_max);
@@ -531,20 +540,21 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 		}
 		else if (tmp_line.indexOf(",") > 0) {
 
-
+			Serial.println("DATA LINE");
 			for (size_t i = 0; i < tmp_header.frame_data_w; i++)
 			{
-
+				size_t os = ((row_counter * tmp_header.frame_data_w) + i) + next_data_offset;
 				unsigned char read_value = (unsigned char)getValue(tmp_line, ',', i).toInt();
-				write_to_ram(((row_counter * tmp_header.frame_data_w) + i) + next_data_offset, read_value);
+				write_to_ram(os, read_value);
 #ifdef _SER_DEBUG_
-				//Serial.print("read cell at "); Serial.print(cell_index); Serial.print(" is "); Serial.println(read_value);
+				Serial.print("read cell at "); Serial.print(os); Serial.print(" is "); Serial.println(read_value);
 #endif
 			}
 			row_counter++;
 		}
 		else // if (tmp_line == "" || !myFile.available()) //seems to be an "" line in the cs project i have checked this twice
 		{
+			Serial.println("ELSE LINE");
 			frame_started = false;
 			next_frame_offset += sizeof(tmp_header) + (tmp_header.frame_data_w* tmp_header.frame_data_h * sizeof(byte));
 			next_data_offset = next_frame_offset + sizeof(SD_FRAME_HEADER);
@@ -558,7 +568,7 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 	myFile.close();
 }
 void read_frame_to_layer(unsigned int _animation_id, unsigned int _frame_id, unsigned int _layer_id, int additional_offset = 0, SD_FRAME_HEADER* _head = NULL) {
-	Serial.println("----------------------------");
+	//Serial.println("----------------------------");
 	SD_FRAME_HEADER tmp;
 	unsigned int  search_offset = 0;
 	tmp.read_ram(search_offset);
@@ -568,12 +578,12 @@ void read_frame_to_layer(unsigned int _animation_id, unsigned int _frame_id, uns
 	while (true)
 	{
 		if (tmp.animation_id == _animation_id && tmp.frame_curr == _frame_id) {
-			Serial.println("FRAME  FOUND");
+			//Serial.println("FRAME  FOUND");
 			break;
 		}
 		tmp.read_ram(search_offset);
 		if (tmp.animation_id == _animation_id && tmp.frame_curr == _frame_id) {
-			Serial.println("FRAME  FOUND 1");
+		//	Serial.println("FRAME  FOUND 1");
 			break;
 		}
 		search_offset += sizeof(SD_FRAME_HEADER) + (tmp.frame_data_w*tmp.frame_data_h * sizeof(byte));
@@ -585,7 +595,7 @@ void read_frame_to_layer(unsigned int _animation_id, unsigned int _frame_id, uns
 
 	};
 	//tmp.print_header();
-	Serial.println(search_offset);
+//	Serial.println(search_offset);
 	//WRITE DATA TO LAYER
 	*_head = tmp;
 	int cell_offset = 0;
@@ -595,14 +605,14 @@ void read_frame_to_layer(unsigned int _animation_id, unsigned int _frame_id, uns
 		{
 	cell_offset = search_offset+ sizeof(SD_FRAME_HEADER)+ (j*tmp.frame_data_h) + i;
 
-			Serial.print(cell_offset); Serial.print("("); Serial.print(read_from_ram(cell_offset)); Serial.print(") ");
+	//		Serial.print(cell_offset); Serial.print("("); Serial.print(read_from_ram(cell_offset)); Serial.print(") ");
 			if (cell_offset >= RAM_SIZE) {
 				Serial.println("FRAME NOT FOUND");
 				return;
 			}
 			set_layer_color(_layer_id, i, j, read_from_ram(cell_offset));
 		}
-		Serial.println();
+	//	Serial.println();
 	}
 
 
@@ -692,29 +702,23 @@ void setup()
 
 
 void loop(){
-	return;
+	
 	unsigned long currentMillis = millis();
 
 
 		// save the last time you blinked the LED
 		previousMillis = currentMillis;
-		Serial.println("TICK");
-		read_frame_to_layer(0, anim_counter, 0, 0);
+	//	Serial.println("TICK");
+	//	read_frame_to_layer(0, anim_counter, 0, 0);
 		anim_counter++;
 		if (anim_counter >= max_anim) {
 			anim_counter = 0;
 		}
 
-		generate_output_layer();
-		show_output_layer();
+//		generate_output_layer();
+//		show_output_layer();
 	
 		delay(500);
 
-		   
-
-
-
-
-	
-
+		  
 }
