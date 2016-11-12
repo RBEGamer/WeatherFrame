@@ -44,27 +44,24 @@ namespace LED_FRAME_BUILDER
             //TODO load from color table file ->input excel string
 
             colors.Clear();
-
             try
             {
                 //TODO REMOVE THE TRY SHIT
-                StreamReader sra = File.OpenText("nes_color_palette.csv");
+                StreamReader sra = File.OpenText("basic_color_table.csv");
                 sra.Close();
             }
             catch (Exception)
             {
-                FileStream sw = File.Create("nes_color_palette.csv");
+                FileStream sw = File.Create("basic_color_table.csv");
+               MessageBox.Show("basic_color_table.csv could not be found please add one to the executable folder");
                //TODO ADD SAMPLE COLORS SIME R G B WHITE BLACK
                 sw.Close();
+                return;
             }
-
-            StreamReader sr = File.OpenText("nes_color_palette.csv");
-
-
+            StreamReader sr = File.OpenText("basic_color_table.csv");
             int count = 0;
             while (true)
             {
-            
                 string read_string = sr.ReadLine();
                 if(read_string == null)
                 {
@@ -78,19 +75,14 @@ namespace LED_FRAME_BUILDER
                 }
                 catch (Exception)
                 {
-
                     continue;
                 }
-                tmc = Color.FromArgb(int.Parse(sp_read[2]), int.Parse(sp_read[3]), int.Parse(sp_read[4]));
-                
+                tmc = Color.FromArgb(int.Parse(sp_read[0]), int.Parse(sp_read[1]), int.Parse(sp_read[2]));
                 colors.Add(tmc);
                 count++;
                 if (sr.EndOfStream) { break; }
             }
             sr.Close();
-
-
-
             int color_pw = color_chooser.Size.Width / 32;
             int color_ph = colors.Count / color_pw;
             color_chooser.Controls.Clear();
@@ -107,15 +99,18 @@ namespace LED_FRAME_BUILDER
             }
         }
 
+private bool AreColorsSimilar(Color c1, Color c2, int tolerance)
+ {
+     return Math.Abs(c1.R - c2.R) < tolerance &&
+            Math.Abs(c1.G - c2.G) < tolerance &&
+            Math.Abs(c1.B - c2.B) < tolerance;
+ }
+
+
 
         private void export_layers()
         {
-            /*
-             * 
-             * */
             string matrix_data = "";
-
-
             for (int i = 0; i < layers.Count; i++)
             {
 
