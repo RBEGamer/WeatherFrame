@@ -73,4 +73,11 @@ class FRM_COLOR
       return FRM_COLOR(_right.r, _right.g, _right.b);
     }
 };
+
+
+
+
+
+
+
 #endif

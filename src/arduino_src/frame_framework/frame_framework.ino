@@ -5,9 +5,17 @@
 #endif
 #include <SPI.h>
 #include <SD.h>
+
+#include "CONFIGURATION.h"
+#include "FRM_ANCHOR.cpp"
+#include "FRM_COLOR.cpp"
+#include "helper_funcs.cpp"
+#include "ram_access.cpp"
+
+
 //SYSTEM DEFINES
-#define _PLATTFORM_ESP_ //ARE THIS SKETCH IS RUNNING ON A EPS ? 
-#ifdef _PLATTFORM_ESP_
+
+#ifdef DISABLE_FLASH_STRINGS
 #define F(param) param
 #endif
 //#define byte unsigned char;
@@ -73,7 +81,21 @@ void show_output_layer();
 //_--------------------VARS
 
 
-
+String getValue(String data, char separator, int index)
+{
+  int found = 0;
+  int strIndex[] = {
+    0, -1 };
+  int maxIndex = data.length() - 1;
+  for (int i = 0; i <= maxIndex && found <= index; i++) {
+    if (data.charAt(i) == separator || i == maxIndex) {
+      found++;
+      strIndex[0] = strIndex[1] + 1;
+      strIndex[1] = (i == maxIndex) ? i + 1 : i;
+    }
+  }
+  return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
 
 
 float layer_intense[COUNT_OF_LAYERS];
@@ -304,7 +326,6 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 		Serial.println(F("FILE CANNOT BE OPEN"));
 		return;
 	}
-
 	SD_FRAME_HEADER tmp_header;
 	bool frame_started = false;
 	unsigned int next_frame_offset = _animation_start_addr; //yeah startoffset ggf add further header offset
@@ -338,9 +359,7 @@ if(tmp_header.frame_data_w > TOTAL_MATRIX_WIDHT){
   tmp_header.frame_data_h = TOTAL_MATRIX_HEIGHT;
   }
 #endif
-
 			frame_started = true;
-		
 			write_to_ram(next_frame_offset + 0, tmp_header.animation_id);
 			write_to_ram(next_frame_offset + 1, tmp_header.frame_curr);
 			write_to_ram(next_frame_offset + 2, tmp_header.frame_max);
