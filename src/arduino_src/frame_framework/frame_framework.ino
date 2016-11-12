@@ -14,27 +14,6 @@
 
 
 
-//PINS
-//ARDUINO PINS
-#define WS2812_PIN 5
-#define SD_CARD_CS_PIN 4
-#define FRAMERATE_OUTPUT_PIN 13 //IF ENABLE_FRAMERATE_OUTPUT defined to check the framerate via oszi
-
-//DEFINE YOUR MATRIX SIZE HERE
-#define VISIBLE_MATRIX_WITH 8 //WIDTH
-#define VISIBLE_MATRIX_HEIGHT 8 //HEIGHT
-//YOU CAN DEFINE HERE YOUR MATRIX SETUP
-#define MATRIX_ORIGIN_LEFT_UP // where is your origin corner MATRIX_ORIGIN_LEFT_UP MATRIX_ORIGIN_LEFT_DOWN MATRIX_ORIGIN_RIGHT_UP MATRIX_ORIGIN_RIGHT_DOWN
-#define MATRIX_MODE_ROW // is your setup MATRIX_MODE_ROW or MATRIX_MODE_COLLUM if not you can enable the USE_LED_LOOKUP feature below
-#define COUNT_OF_LAYERS 2 //SET LAYER COUNT HERE, IF YOU WANT TO FADE BETWEEN ANIMATIONS 2,4,6,8,.. LAYERS ARE REQUIRED WATCH YOUR RAM
-#define LED_COLOR_MODE_RGB // DEFAULT RGB RBG BGR BRG GBR GRB
-#define ENABLE_OUTPUT_INTENSE //enables a additional intense multiplier to the output layer
-//#define ENABLE_LAYER_MOVEMENT
-#define RAM_SIZE 2048 //DEFINE HERE YOUR CONNECTED SRAM SIZE
-
-//HELPER DEFINES
-#define ENABLE_FRAMERATE_OUTPUT
-#define _SER_DEBUG_ //ENABE SERIAL DEBUGGIN
 
 
 
@@ -67,13 +46,6 @@
 bool framerate_output_state = false;
 #endif
 
-//YOU CAN HERE CREATE A LOOKUPTABLE IF YOUR LEDS NOT IN ROW OR COLLUM
-//you can change the led id here if your setup is not collum/row based
-//in the defualt setting the virtual led id of led 0 is 0
-//if your real first led has for e.g. the number 10 then you can change it here
-//you can use excel sheet 'led_lookup_creator'
-//#define USE_LED_LOOKUP
-//#define USE_LED_LOOKUP_PROGMEM
 #ifdef USE_LED_LOOKUP
 const int led_id_lookup[LED_COUNT] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254 };
 #else
@@ -86,8 +58,6 @@ const int led_id_lookup[LED_COUNT] PROGMEM = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 
 
 //COLOR PALETTE
-//if you define COLOR_TABLE_PROGMEM the color table will be stored in the flash memory so it can be slower
-#define COLOR_TABLE_PROGMEM
 /* COLOR TABLE SEE EXCEL FILE*/
 #define FTC FRM_COLOR //<- is for the excel table generation because the cell char limit.... :/
 #ifdef COLOR_TABLE_PROGMEM
@@ -118,9 +88,6 @@ FRM_COLOR output_layer[VISIBLE_MATRIX_WITH][VISIBLE_MATRIX_HEIGHT]; //the final 
 const FRM_COLOR clear_color = FRM_COLOR(0, 0, 0);
 const unsigned int clear_color_id = 0; //see clearcolor at lookup table
 const FRM_ANCHOR center = FRM_ANCHOR(ANCHOR_X, ANCHOR_Y);
-
-
-
 
 //LED DEFINES
 Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(TOTAL_MATRIX_CELL_COUNT, WS2812_PIN, NEO_GRB + NEO_KHZ800);
@@ -362,6 +329,15 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 #ifdef _SER_DEBUG_
 			tmp_header.print_header();
 #endif
+//LOAD ONLY RIGHT SIZE ANIMATION
+#ifdef SD_LOAD_ONLY_RIGHT_SIZE_ANIMATIONS
+if(tmp_header.frame_data_w > TOTAL_MATRIX_WIDHT){
+  tmp_header.frame_data_w = TOTAL_MATRIX_WIDHT;
+  }
+  if(tmp_header.frame_data_h > TOTAL_MATRIX_HEIGHT){
+  tmp_header.frame_data_h = TOTAL_MATRIX_HEIGHT;
+  }
+#endif
 
 			frame_started = true;
 		
@@ -373,6 +349,10 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
      row_counter = 0;
 		}
 		else if (tmp_line.indexOf(",") > 0) {
+    if(row_counter >= tmp_header.frame_data_h){
+      continue;
+      }
+      
 			for (size_t i = 0; i < tmp_header.frame_data_w; i++)
 			{
 				size_t os = ((row_counter * tmp_header.frame_data_w) + i) + next_data_offset;
@@ -383,6 +363,7 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 #endif
 			}
 			row_counter++;
+      
 		}
 		else //if (tmp_line == "" || myFile.available()) //seems to be an "" line in the cs project i have checked this twice
 		{
