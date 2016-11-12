@@ -18,7 +18,7 @@
 //ARDUINO PINS
 #define WS2812_PIN 5
 #define SD_CARD_CS_PIN 4
-
+#define FRAMERATE_OUTPUT_PIN 13 //IF ENABLE_FRAMERATE_OUTPUT defined to check the framerate via oszi
 
 //DEFINE YOUR MATRIX SIZE HERE
 #define VISIBLE_MATRIX_WITH 8 //WIDTH
@@ -26,14 +26,14 @@
 //YOU CAN DEFINE HERE YOUR MATRIX SETUP
 #define MATRIX_ORIGIN_LEFT_UP // where is your origin corner MATRIX_ORIGIN_LEFT_UP MATRIX_ORIGIN_LEFT_DOWN MATRIX_ORIGIN_RIGHT_UP MATRIX_ORIGIN_RIGHT_DOWN
 #define MATRIX_MODE_ROW // is your setup MATRIX_MODE_ROW or MATRIX_MODE_COLLUM if not you can enable the USE_LED_LOOKUP feature below
-#define COUNT_OF_LAYERS 2 //SET LAYER COUNT HERE WATCH YOUR RAM
+#define COUNT_OF_LAYERS 2 //SET LAYER COUNT HERE, IF YOU WANT TO FADE BETWEEN ANIMATIONS 2,4,6,8,.. LAYERS ARE REQUIRED WATCH YOUR RAM
 #define LED_COLOR_MODE_RGB // DEFAULT RGB RBG BGR BRG GBR GRB
 #define ENABLE_OUTPUT_INTENSE //enables a additional intense multiplier to the output layer
 //#define ENABLE_LAYER_MOVEMENT
-#define RAM_SIZE 2048
+#define RAM_SIZE 2048 //DEFINE HERE YOUR CONNECTED SRAM SIZE
 
-
-
+//HELPER DEFINES
+#define ENABLE_FRAMERATE_OUTPUT
 #define _SER_DEBUG_ //ENABE SERIAL DEBUGGIN
 
 
@@ -58,10 +58,14 @@
 #define ANCHOR_X 0
 #define ANCHOR_Y 0
 #endif
+
+//HELPER DEFINES
 #ifdef DEBUG
 #define _SER_DEBUG_
 #endif // DEBUG
-
+#ifdef ENABLE_FRAMERATE_OUTPUT
+bool framerate_output_state = false;
+#endif
 
 //YOU CAN HERE CREATE A LOOKUPTABLE IF YOUR LEDS NOT IN ROW OR COLLUM
 //you can change the led id here if your setup is not collum/row based
@@ -78,106 +82,8 @@ const int led_id_lookup[LED_COUNT] PROGMEM = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 #endif
 #endif
 
-//COLOR STRUCT
-#ifndef F_FRM_COLOR
-#define F_FRM_COLOR
-#define COLOR_DESC FRM_COLOR
-#define FRM_COLOR_TYPE  unsigned char
-//TODO IMPLEMENT OPERATOR
-class FRM_COLOR
-{
-  public:
-    FRM_COLOR_TYPE r;
-    FRM_COLOR_TYPE g;
-    FRM_COLOR_TYPE b;
-    const FRM_COLOR_TYPE min_off = 0;
-    const FRM_COLOR_TYPE max_on = 255;
 
 
-	unsigned int responding_color_id = 0;
-    FRM_COLOR(FRM_COLOR_TYPE _r, FRM_COLOR_TYPE _g, FRM_COLOR_TYPE _b) {
-      r = _r;
-      g = _g;
-      b = _b;
-    }
-    FRM_COLOR() {
-      r = min_off;
-      g = min_off;
-      b = min_off;
-    }
-    void make_max() {
-      r = max_on;
-      g = max_on;
-      b = max_on;
-    }
-    void make_min() {
-      r = min_off;
-      g = min_off;
-      b = min_off;
-    }
-    //NOT SAFE !!!!
-    void invert() {
-      r = max_on - r;
-      g = max_on - g;
-      b = max_on - b;
-    }
-    inline void set_color(FRM_COLOR_TYPE _r, FRM_COLOR_TYPE _g, FRM_COLOR_TYPE _b,unsigned int _color_id) {
-      r = _r;
-      g = _g ;
-      b = _b ;
-	  responding_color_id = _color_id;
-    }
-    void set_color(FRM_COLOR _c, unsigned int _color_id) {
-      r = _c.r ;
-      g = _c.g ;
-      b = _c.b ;
-	  responding_color_id = _color_id;
-    }
-    inline FRM_COLOR_TYPE get_r(){
-      return r;
-    }
-    inline FRM_COLOR_TYPE get_g(){
-      return g;
-    }
-    inline FRM_COLOR_TYPE get_b(){
-      return b;
-    }
-    bool equals(FRM_COLOR _e) {
-      //return _c1.r && _c2.r && _c1.g && _c2.g && _c1.b && _c2.b;
-      if (_e.r == r && _e.g == g && _e.b == b) {
-        return true;
-      }
-      return false;
-    }
-    FRM_COLOR operator=(const FRM_COLOR _right ) {
-      return FRM_COLOR(_right.r, _right.g, _right.b);
-    }
-};
-#endif
-#ifndef F_FRM_ANCHOR
-#define F_FRM_ANCHOR
-#define FRM_INT int
-class FRM_ANCHOR
-{
-  public:
-    FRM_INT x;
-    FRM_INT y;
-    FRM_ANCHOR() {
-      x = 0;
-      y = 0;
-    }
-    FRM_ANCHOR(const FRM_INT _x, const FRM_INT _y) {
-      x = _x;
-      y = _y;
-    }
-    ~FRM_ANCHOR() {
-    }
-    FRM_ANCHOR operator=(const FRM_ANCHOR _right) {
-      return FRM_ANCHOR(_right.x, _right.y);
-    }
-  private:
-};
-#endif
 
 //COLOR PALETTE
 //if you define COLOR_TABLE_PROGMEM the color table will be stored in the flash memory so it can be slower
@@ -214,88 +120,14 @@ const unsigned int clear_color_id = 0; //see clearcolor at lookup table
 const FRM_ANCHOR center = FRM_ANCHOR(ANCHOR_X, ANCHOR_Y);
 
 
-#ifndef FRM_ANIMATIONS
-#define FRM_ANIMATIONS
-class FRM_ANIMATION
-{
-public:
-	FRM_ANIMATION();
-	~FRM_ANIMATION();
-
-
-unsigned int sram_start_pos = 0;
-
-#if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 1
-	FRM_ANCHOR animation_anchor = FRM_ANCHOR(0, 0);
-#else
-	FRM_ANCHOR animation_anchor = FRM_ANCHOR(VISIBLE_MATRIX_WITH, VISIBLE_MATRIX_HEIGHT);
-#endif // MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 0
-
-
-
-
-};
-
-FRM_ANIMATION::FRM_ANIMATION()
-{
-}
-FRM_ANIMATION::~FRM_ANIMATION()
-{
-}
-#endif
 
 
 //LED DEFINES
 Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(TOTAL_MATRIX_CELL_COUNT, WS2812_PIN, NEO_GRB + NEO_KHZ800);
 
 
-//DEMO RAM
-#ifndef DEMO_RAM
-#define DEMO_RAM
-#define DEMO_RAM_SIZE 2048
-unsigned char demo_ram[DEMO_RAM_SIZE];
-inline void write_to_ram(unsigned int _addr, unsigned char _value) {
-	if (_addr > DEMO_RAM_SIZE - 1) {
-#ifdef _SER_DEBUG_
-		Serial.println(F("DEMO RAM - OUT OF RANGE"));
-#endif
-	}
-	else {
-		demo_ram[_addr] = _value;
-	}
-	}
-inline unsigned char read_from_ram(unsigned int _addr) {
-	if (_addr > DEMO_RAM_SIZE - 1) {
-#ifdef _SER_DEBUG_
-		Serial.println(F("DEMO RAM - OUT OF RANGE"));
-#endif
-		return NULL;
-	}
-	return demo_ram[_addr];
-}
-void init_ram() {
-	for (int i = 0; i < DEMO_RAM_SIZE; i++) {
 
-		demo_ram[i] = 0;
-	}
-}
-#endif // !DEMO_RAM
 
-String getValue(String data, char separator, int index)
-{
-	int found = 0;
-	int strIndex[] = {
-		0, -1 };
-	int maxIndex = data.length() - 1;
-	for (int i = 0; i <= maxIndex && found <= index; i++) {
-		if (data.charAt(i) == separator || i == maxIndex) {
-			found++;
-			strIndex[0] = strIndex[1] + 1;
-			strIndex[1] = (i == maxIndex) ? i + 1 : i;
-		}
-	}
-	return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
-}
 
 
 //FRAME PARSE INFO
@@ -416,6 +248,11 @@ void generate_output_layer(const bool _direct_show = false) {
 		return;
 	}
 	show_output_layer();
+
+#ifdef ENABLE_FRAMERATE_OUTPUT
+framerate_output_state = !framerate_output_state;
+digitalWrite(FRAMERATE_OUTPUT_PIN,framerate_output_state);
+#endif
 }
 void clear_layer(const int _id) {
 	for (size_t x = 0; x < TOTAL_MATRIX_WIDHT; x++)
@@ -481,8 +318,6 @@ inline void set_layer_color(const int _layer, const unsigned int _x, const unsig
 
 
 void layer_write_to_serial(unsigned int _layer_id) {
-
-
 	for (size_t i = 0; i <TOTAL_MATRIX_WIDHT; i++)
 	{
 		for (size_t j = 0; j < TOTAL_MATRIX_HEIGHT; j++)
@@ -519,8 +354,6 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 		Serial.println(tmp_line);
 		//CHECK FOR LINE TYPE
 		if (tmp_line.indexOf("_") > 0) {
-			//CECK IF FRAME STARTED IF TRUE MAKE THE SAME AS ELSE LINE
-			Serial.println("HEADER LINE");
 			tmp_header.frame_curr = getValue(tmp_line, '_', 1).toInt();
 			tmp_header.frame_max = getValue(tmp_line, '_', 2).toInt();
 			tmp_header.frame_data_w = getValue(tmp_line, '_', 3).toInt();
@@ -537,31 +370,32 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 			write_to_ram(next_frame_offset + 2, tmp_header.frame_max);
 			write_to_ram(next_frame_offset + 3, tmp_header.frame_data_w);
 			write_to_ram(next_frame_offset + 4, tmp_header.frame_data_h);
+     row_counter = 0;
 		}
 		else if (tmp_line.indexOf(",") > 0) {
-
-			Serial.println("DATA LINE");
 			for (size_t i = 0; i < tmp_header.frame_data_w; i++)
 			{
 				size_t os = ((row_counter * tmp_header.frame_data_w) + i) + next_data_offset;
 				unsigned char read_value = (unsigned char)getValue(tmp_line, ',', i).toInt();
 				write_to_ram(os, read_value);
 #ifdef _SER_DEBUG_
-				Serial.print("read cell at "); Serial.print(os); Serial.print(" is "); Serial.println(read_value);
+				Serial.print("write cell at "); Serial.print(os); Serial.print(" is "); Serial.println(read_value);
 #endif
 			}
 			row_counter++;
 		}
-		else // if (tmp_line == "" || !myFile.available()) //seems to be an "" line in the cs project i have checked this twice
+		else //if (tmp_line == "" || myFile.available()) //seems to be an "" line in the cs project i have checked this twice
 		{
-			Serial.println("ELSE LINE");
+    row_counter = 0;
 			frame_started = false;
 			next_frame_offset += sizeof(tmp_header) + (tmp_header.frame_data_w* tmp_header.frame_data_h * sizeof(byte));
 			next_data_offset = next_frame_offset + sizeof(SD_FRAME_HEADER);
 			if (_next_data_start != nullptr) {
 				*_next_data_start = next_data_offset + 1;
 			}
+	#ifdef _SER_DEBUG_
 			Serial.print("FRAME FINISH next frame offset is "); Serial.print(next_frame_offset); Serial.print(" NEXT DATA OFFSET IS:"); Serial.println(next_data_offset);
+    #endif
 		}
 
 	}
@@ -627,11 +461,26 @@ unsigned long previousMillis = 0;
 const long interval = 1000;
 
 
-
 void setup()
 {
+  
   Serial.begin(115200);
+  #ifdef _SER_DEBUG_
+  Serial.println(F("INIT LED MATRIX"));
+#endif
   led_matrix.begin();
+
+
+#ifdef ENABLE_FRAMERATE_OUTPUT
+pinMode(FRAMERATE_OUTPUT_PIN, OUTPUT);
+framerate_output_state = false;
+digitalWrite(FRAMERATE_OUTPUT_PIN, framerate_output_state);
+  #ifdef _SER_DEBUG_
+  Serial.print(F("ENABLE FRAMERATE OUTPUT AT PIN"));Serial.println(FRAMERATE_OUTPUT_PIN);
+#endif
+#endif
+
+
 
 
 #ifdef _SER_DEBUG_
@@ -687,7 +536,7 @@ void setup()
 
 
 
-	//layers[0][(i / 8)][(i%8)] = spiRam.read_byte(i);
+	
 
 
 
@@ -705,20 +554,20 @@ void loop(){
 	
 	unsigned long currentMillis = millis();
 
-
+if((currentMillis - previousMillis) > 100){
 		// save the last time you blinked the LED
 		previousMillis = currentMillis;
 	//	Serial.println("TICK");
-	//	read_frame_to_layer(0, anim_counter, 0, 0);
+		read_frame_to_layer(0, anim_counter, 0, 0);
 		anim_counter++;
 		if (anim_counter >= max_anim) {
 			anim_counter = 0;
 		}
 
-//		generate_output_layer();
-//		show_output_layer();
-	
-		delay(500);
+	generate_output_layer();
+		show_output_layer();
+}
+	//	delay(500);
 
 		  
 }
