@@ -33,3 +33,4 @@
 -> color tbale zum ram dazuzählen
 ->add delay to layer header
 ->wenn beendet schreibe neue color table to basic color table
+-> bmp import ->expand color table -> singe bmp eg 16x16 or multiframe bmp 16x512
