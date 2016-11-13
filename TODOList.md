@@ -32,5 +32,14 @@
 -> colo picker farbe wählen und dann im array nach der nächsten verfügbaren farbe suchen wenn abstand zur gross zum array hinzufügen
 -> color tbale zum ram dazuzählen
 ->add delay to layer header
+
 ->wenn beendet schreibe neue color table to basic color table
 -> bmp import ->expand color table -> singe bmp eg 16x16 or multiframe bmp 16x512
+
+
+
+
+# planned
+-> rainbow mode
+-> start stop next animation button
+-> weather mode
