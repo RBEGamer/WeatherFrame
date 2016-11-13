@@ -20,7 +20,7 @@
 -> add rainmow mode
 -> add clock mode
 
-
+-> extra debug func print to serial adden ink line and func name
 ## FRAME_BUILDER GUI
 
 * max 255 layer
