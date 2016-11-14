@@ -7,20 +7,12 @@
 #include <SD.h>
 
 #include "CONFIGURATION.h"
-#include "FRM_ANCHOR.cpp"
 #include "FRM_COLOR.cpp"
 #include "helper_funcs.cpp"
-#include "ram_access.cpp"
+
 
 
 //SYSTEM DEFINES
-
-#ifdef DISABLE_FLASH_STRINGS
-#define F(param) param
-#endif
-//#define byte unsigned char;
-
-
 
 
 
@@ -46,10 +38,8 @@
 #define ANCHOR_Y 0
 #endif
 
-//HELPER DEFINES
-#ifdef DEBUG
-#define _SER_DEBUG_
-#endif // DEBUG
+
+
 #ifdef ENABLE_FRAMERATE_OUTPUT
 bool framerate_output_state = false;
 #endif
@@ -62,23 +52,57 @@ const int led_id_lookup[LED_COUNT] PROGMEM = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 #endif
 #endif
 
+//DEMO RAM
+#ifndef DEMO_RAM
+#define DEMO_RAM
+#define DEMO_RAM_SIZE 65536
+#define DEMO_RAM_INIT_CHAR 0
+#define DEMO_RAM_ERROR_CHAR 0
 
+unsigned char demo_ram[DEMO_RAM_SIZE];
 
-
-//COLOR PALETTE
-/* COLOR TABLE SEE EXCEL FILE*/
-#define FTC FRM_COLOR //<- is for the excel table generation because the cell char limit.... :/
-#ifdef COLOR_TABLE_PROGMEM
-const FTC color_lookup_table[64] PROGMEM = { FTC(124,124,124),FTC(0,0,252),FTC(0,0,188),FTC(68,40,188),FTC(148,0,132),FTC(168,0,32),FTC(168,16,0),FTC(136,20,0),FTC(80,48,0),FTC(0,120,0),FTC(0,104,0),FTC(0,88,0),FTC(0,64,88),FTC(0,0,0),FTC(0,0,0),FTC(0,0,0),FTC(188,188,188),FTC(0,120,248),FTC(0,88,248),FTC(104,68,252),FTC(216,0,204),FTC(228,0,88),FTC(248,56,0),FTC(228,92,16),FTC(172,124,0),FTC(0,184,0),FTC(0,168,0),FTC(0,168,68),FTC(0,136,136),FTC(0,0,0),FTC(0,0,0),FTC(0,0,0),FTC(248,248,248),FTC(60,188,252),FTC(104,136,252),FTC(152,120,248),FTC(248,120,248),FTC(248,88,152),FTC(248,120,88),FTC(252,160,68),FTC(248,184,0),FTC(184,248,24),FTC(88,216,84),FTC(88,248,152),FTC(0,232,216),FTC(120,120,120),FTC(0,0,0),FTC(0,0,0),FTC(252,252,252),FTC(164,228,252),FTC(184,184,248),FTC(216,184,248),FTC(248,184,248),FTC(248,164,192),FTC(240,208,176),FTC(252,224,168),FTC(248,216,120),FTC(216,248,120),FTC(184,248,184),FTC(184,248,216),FTC(0,252,252),FTC(248,216,248),FTC(0,0,0),FTC(0,0,0) };
-#else
-const FTC color_lookup_table[64] = { FTC(124,124,124),FTC(0,0,252),FTC(0,0,188),FTC(68,40,188),FTC(148,0,132),FTC(168,0,32),FTC(168,16,0),FTC(136,20,0),FTC(80,48,0),FTC(0,120,0),FTC(0,104,0),FTC(0,88,0),FTC(0,64,88),FTC(0,0,0),FTC(0,0,0),FTC(0,0,0),FTC(188,188,188),FTC(0,120,248),FTC(0,88,248),FTC(104,68,252),FTC(216,0,204),FTC(228,0,88),FTC(248,56,0),FTC(228,92,16),FTC(172,124,0),FTC(0,184,0),FTC(0,168,0),FTC(0,168,68),FTC(0,136,136),FTC(0,0,0),FTC(0,0,0),FTC(0,0,0),FTC(248,248,248),FTC(60,188,252),FTC(104,136,252),FTC(152,120,248),FTC(248,120,248),FTC(248,88,152),FTC(248,120,88),FTC(252,160,68),FTC(248,184,0),FTC(184,248,24),FTC(88,216,84),FTC(88,248,152),FTC(0,232,216),FTC(120,120,120),FTC(0,0,0),FTC(0,0,0),FTC(252,252,252),FTC(164,228,252),FTC(184,184,248),FTC(216,184,248),FTC(248,184,248),FTC(248,164,192),FTC(240,208,176),FTC(252,224,168),FTC(248,216,120),FTC(216,248,120),FTC(184,248,184),FTC(184,248,216),FTC(0,252,252),FTC(248,216,248),FTC(0,0,0),FTC(0,0,0) };
+inline void write_to_ram(unsigned int _addr, unsigned char _value) {
+	if (_addr > DEMO_RAM_SIZE - 1) {
+#ifdef _SER_DEBUG_
+		Serial.println(F("DEMO RAM - OUT OF RANGE"));
 #endif
+	}
+	else {
+		demo_ram[_addr] = _value;
+	}
+}
+inline unsigned char read_from_ram(unsigned int _addr) {
+	if (_addr > DEMO_RAM_SIZE - 1) {
+#ifdef _SER_DEBUG_
+		Serial.println(F("DEMO RAM - OUT OF RANGE"));
+#endif
+		return DEMO_RAM_ERROR_CHAR;
+	}
+	return demo_ram[_addr];
+}
+void init_ram() {
+	for (int i = 0; i < DEMO_RAM_SIZE; i++) {
+		demo_ram[i] = DEMO_RAM_INIT_CHAR;
+	}
+}
+#endif // !DEMO_RAM
+
+
+
 
 
 //func deklare
 void show_output_layer();
 
 //_--------------------VARS
+
+
+void print_color(FRM_COLOR _col) {
+	Serial.print("COLOR R:"); Serial.print(_col.r);
+	Serial.print(" G:"); Serial.print(_col.g);
+	Serial.print(" B:"); Serial.println(_col.b);
+}
+
 
 
 String getValue(String data, char separator, int index)
@@ -109,7 +133,7 @@ FRM_COLOR output_layer[VISIBLE_MATRIX_WITH][VISIBLE_MATRIX_HEIGHT]; //the final 
 //CONST COLORS
 const FRM_COLOR clear_color = FRM_COLOR(0, 0, 0);
 const unsigned int clear_color_id = 0; //see clearcolor at lookup table
-const FRM_ANCHOR center = FRM_ANCHOR(ANCHOR_X, ANCHOR_Y);
+
 
 //LED DEFINES
 Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(TOTAL_MATRIX_CELL_COUNT, WS2812_PIN, NEO_GRB + NEO_KHZ800);
@@ -119,15 +143,18 @@ Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(TOTAL_MATRIX_CELL_COUNT, WS2812
 
 
 
-//FRAME PARSE INFO
+//FRAME PARSE INFO HRADER V2 7 Byte
 struct SD_FRAME_HEADER {
 	unsigned char animation_id;
 	unsigned char frame_curr;
 	unsigned char  frame_max;
 	unsigned char frame_data_w;
 	unsigned char frame_data_h;
+	unsigned char frame_visibility;
+	unsigned char frame_delay;
+
 	void print_header() {
-		Serial.print(F("FRAME_HEADER FOR ANIMATION:")); Serial.print(animation_id); Serial.print(F(" CURR:")); Serial.print(frame_curr); Serial.print(F(" FROM : ")); Serial.print(frame_max); Serial.print(F(" W : ")); Serial.print(frame_data_w); Serial.print(F(" H : ")); Serial.println(frame_data_h);
+		Serial.print(F("FRAME_HEADER FOR ANIMATION:")); Serial.print(animation_id); Serial.print(F(" CURR:")); Serial.print(frame_curr); Serial.print(F(" FROM : ")); Serial.print(frame_max); Serial.print(F(" W : ")); Serial.print(frame_data_w); Serial.print(F(" H : ")); Serial.print(frame_data_h); Serial.print(F(" DELAY : ")); Serial.print(frame_delay); Serial.print(F(" VISIBLE : ")); Serial.println(frame_visibility);
 	}
 
 	void read_ram(const int _start_addr) {
@@ -136,40 +163,44 @@ struct SD_FRAME_HEADER {
 		frame_max = read_from_ram(_start_addr + 2);
 		frame_data_w = read_from_ram(_start_addr + 3);
 		frame_data_h = read_from_ram(_start_addr + 4);
+		frame_visibility = read_from_ram(_start_addr + 5);
+		frame_delay = read_from_ram(_start_addr + 6);
 	}
 
 };
 
+
+
 //GET LED
-inline void set_led_color( FRM_ANCHOR _pos,  FRM_COLOR* _color) {
+inline void set_led_color( int _x, int _y,  FRM_COLOR* _color) {
   unsigned int led_id = 0;
   //CHECK IF POINT IS IN RANGE
 #ifdef MATRIX_ORIGIN_LEFT_UP
   //NO CHANGE
 #endif
 #ifdef MATRIX_ORIGIN_LEFT_DOWN
-  _pos.y = (VISIBLE_MATRIX_HEIGHT - 1) - _pos.y;
-  _pos.x = (VISIBLE_MATRIX_WITH - 1) - _pos.x;
+  _y = (VISIBLE_MATRIX_HEIGHT - 1) - _y;
+  _x = (VISIBLE_MATRIX_WITH - 1) - _x;
 #endif
 
 #ifdef MATRIX_ORIGIN_RIGHT_UP
-  _pos.x = (VISIBLE_MATRIX_WITH - 1) - _pos.x;
+  _x = (VISIBLE_MATRIX_WITH - 1) - _x;
 #endif
 
 #ifdef MATRIX_ORIGIN_RIGHT_DOWN
-  _pos.y = (VISIBLE_MATRIX_HEIGHT - 1) - _pos.y;
+  _y = (VISIBLE_MATRIX_HEIGHT - 1) - _y;
 #endif
 #ifdef MATRIX_MODE_COLLUM
-  if (_pos.x % 2) //x gerade
-    led_id = (_pos.x * VISIBLE_MATRIX_HEIGHT) + _pos.y;
+  if (_x % 2) //x gerade
+    led_id = (_x * VISIBLE_MATRIX_HEIGHT) + _y;
   else //x ungerade
-    led_id = (_pos.x * VISIBLE_MATRIX_HEIGHT) + ((VISIBLE_MATRIX_HEIGHT - 1) - _pos.y);
+    led_id = (_x * VISIBLE_MATRIX_HEIGHT) + ((VISIBLE_MATRIX_HEIGHT - 1) - _y);
 #endif
 #ifdef MATRIX_MODE_ROW
-  if (_pos.y % 2) //y gerade
-    led_id =  _pos.x + (_pos.y * VISIBLE_MATRIX_WITH);
+  if (_y % 2) //y gerade
+    led_id =  _x + (_y * VISIBLE_MATRIX_WITH);
   else //y ungerade
-    led_id = ((VISIBLE_MATRIX_WITH - 1) - _pos.x) + (_pos.y * VISIBLE_MATRIX_WITH);
+    led_id = ((VISIBLE_MATRIX_WITH - 1) - _x) + (_y * VISIBLE_MATRIX_WITH);
 #endif
   //GET ID VIA LOOKUPTABLE
 #ifdef USE_LED_LOOKUP
@@ -212,17 +243,24 @@ void generate_output_layer(const bool _direct_show = false) {
 #ifdef _SER_DEBUG_
 	//Serial.println(F("gen output layer"));
 #endif
+	clear_output_layer();
+
     for (size_t w = 0; w < VISIBLE_MATRIX_WITH; w++) {
       for (size_t h = 0; h < VISIBLE_MATRIX_HEIGHT; h++) {
-        output_layer[w][h].set_color(clear_color, clear_color_id);
+       
 
         for(size_t _i = 0; _i < COUNT_OF_LAYERS; _i++){
           size_t i =  _i;//REMOVE THAT SHIT
             #if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 1
-	            if (layers[i][w][h] != output_layer[w][h].responding_color_id && layers[i][w][h] != clear_color_id) {
+	            if (layers[i][w][h] != clear_color_id) {
 					//color_lookup_table[
-					output_layer[w][h].set_color(color_lookup_table[layers[i][w][h]].r * layer_intense[i], color_lookup_table[layers[i][w][h]].g * layer_intense[i], color_lookup_table[layers[i][w][h]].b * layer_intense[i], layers[i][w][h]);
-					output_layer[w][h].responding_color_id = layers[i][w][h];
+					output_layer[w][h].set_color(
+						read_from_ram(RAM_COLOR_TABLE_OFFSET + (layers[i][w][h] * 3) + 0)  ,
+						read_from_ram(RAM_COLOR_TABLE_OFFSET + (layers[i][w][h] * 3) + 1) ,
+						read_from_ram(RAM_COLOR_TABLE_OFFSET + (layers[i][w][h] * 3) + 2) );
+					
+		
+					
               }
             #else
               if (!layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(output_layer[w][h]) && !layers[i][w+VISIBLE_MATRIX_WITH][h+VISIBLE_MATRIX_HEIGHT].equals(clear_color)) {
@@ -238,10 +276,7 @@ void generate_output_layer(const bool _direct_show = false) {
 	}
 	show_output_layer();
 
-#ifdef ENABLE_FRAMERATE_OUTPUT
-framerate_output_state = !framerate_output_state;
-digitalWrite(FRAMERATE_OUTPUT_PIN,framerate_output_state);
-#endif
+
 }
 void clear_layer(const int _id) {
 	for (size_t x = 0; x < TOTAL_MATRIX_WIDHT; x++)
@@ -252,60 +287,43 @@ void clear_layer(const int _id) {
 		}
 	}
 }
+void clear_output_layer() {
+	for (size_t x = 0; x < VISIBLE_MATRIX_WITH; x++)
+	{
+		for (size_t y = 0; y < VISIBLE_MATRIX_HEIGHT; y++)
+		{
+			output_layer[x][y].set_color(clear_color.r, clear_color.g, clear_color.b);
+		}
+	}
+}
 void clear_all_layers() {
   for (size_t i = 0; i < COUNT_OF_LAYERS; i++)
   {
     clear_layer(i);
   }
-}
-void clear_output_layer() {
-  for (size_t x = 0; x < VISIBLE_MATRIX_WITH; x++)
-  {
-    for (size_t y = 0; y < VISIBLE_MATRIX_HEIGHT; y++)
-    {
-      output_layer[x][y].set_color(clear_color,clear_color_id);
-    }
-  }
+  clear_output_layer();
 }
 void show_output_layer() {
   for (size_t x = 0; x < VISIBLE_MATRIX_WITH; x++)
   {
     for (size_t y = 0; y < VISIBLE_MATRIX_HEIGHT; y++)
     {
-      set_led_color(FRM_ANCHOR(x, y), &output_layer[x][y]);
+      set_led_color(x, y, &output_layer[x][y]);
     }
   }
   led_matrix.show();
-}
-void  show_specific_layer(const int _id) {
-  for (size_t w = 0; w < VISIBLE_MATRIX_WITH; w++) {
-    for (size_t h = 0; h < VISIBLE_MATRIX_HEIGHT; h++) {
-#if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 1
-		output_layer[w][h].set_color(color_lookup_table[layers[_id][w][h]], layers[_id][w][h]);
-#else
-		output_layer[w][h].set_color(color_lookup_table[layers[_id][w + VISIBLE_MATRIX_WITH][h + VISIBLE_MATRIX_HEIGHT]], layers[_id][w + VISIBLE_MATRIX_WITH][h + VISIBLE_MATRIX_HEIGHT]);
-#endif
-      
-    }
-  }
-  show_output_layer();
-}
-inline void set_layer_color(const int _layer, const FRM_ANCHOR* _pos, const unsigned int  _color) {
-#if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 3
-	layers[_layer][_pos->x + VISIBLE_MATRIX_WITH][_pos->y + VISIBLE_MATRIX_HEIGHT] = _color;
-#else
-	layers[_layer][_pos->x][_pos->y] = _color;
+#ifdef ENABLE_FRAMERATE_OUTPUT
+  framerate_output_state = !framerate_output_state;
+  digitalWrite(FRAMERATE_OUTPUT_PIN, framerate_output_state);
 #endif
 }
 inline void set_layer_color(const int _layer, const unsigned int _x, const unsigned int _y, const unsigned int _color) {
 #if MATRIX_INVISIBLE_SIZE_MULTIPLIKATOR == 3
 	layers[_layer][_x + VISIBLE_MATRIX_WITH][_y + VISIBLE_MATRIX_HEIGHT] = _color;
 #else
-	layers[_layer][_x ][_y ] = _color;
+	layers[_layer][_x][_y] = _color;
 #endif
 }
-
-
 void layer_write_to_serial(unsigned int _layer_id) {
 	for (size_t i = 0; i <TOTAL_MATRIX_WIDHT; i++)
 	{
@@ -316,6 +334,8 @@ void layer_write_to_serial(unsigned int _layer_id) {
 		Serial.println("");
 	}
 }
+
+
 
 void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_start, const byte animation_id_counter, const  unsigned int _animation_start_addr = 0) {
 	//FIRST OPEN FILE TO CHECK EXISTS
@@ -338,17 +358,19 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 		
 		//GET CURRENT LINE
 		String tmp_line = "";
-		tmp_line = myFile.readStringUntil('\n');
-		Serial.println(tmp_line);
+		tmp_line = myFile.readStringUntil(SD_FILE_NEW_LINE_CHAR);
+		//Serial.println(tmp_line);
 		//CHECK FOR LINE TYPE
-		if (tmp_line.indexOf("_") > 0) {
-			tmp_header.frame_curr = getValue(tmp_line, '_', 1).toInt();
-			tmp_header.frame_max = getValue(tmp_line, '_', 2).toInt();
-			tmp_header.frame_data_w = getValue(tmp_line, '_', 3).toInt();
-			tmp_header.frame_data_h = getValue(tmp_line, '_', 4).toInt();
+		if (tmp_line.indexOf(SD_FILE_FRAME_HEADER_SEPERATOR) > 0) {
+			tmp_header.frame_curr = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 1).toInt();
+			tmp_header.frame_max = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 2).toInt();
+			tmp_header.frame_data_w = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 3).toInt();
+			tmp_header.frame_data_h = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 4).toInt();
+			tmp_header.frame_visibility = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 5).toInt();
+			tmp_header.frame_delay = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 6).toInt();
 			tmp_header.animation_id = animation_id_counter;
 #ifdef _SER_DEBUG_
-			tmp_header.print_header();
+		//	tmp_header.print_header();
 #endif
 //LOAD ONLY RIGHT SIZE ANIMATION
 #ifdef SD_LOAD_ONLY_RIGHT_SIZE_ANIMATIONS
@@ -365,9 +387,12 @@ if(tmp_header.frame_data_w > TOTAL_MATRIX_WIDHT){
 			write_to_ram(next_frame_offset + 2, tmp_header.frame_max);
 			write_to_ram(next_frame_offset + 3, tmp_header.frame_data_w);
 			write_to_ram(next_frame_offset + 4, tmp_header.frame_data_h);
-     row_counter = 0;
+			write_to_ram(next_frame_offset + 5, tmp_header.frame_visibility);
+			write_to_ram(next_frame_offset + 6, tmp_header.frame_delay);
+
+			row_counter = 0;
 		}
-		else if (tmp_line.indexOf(",") > 0) {
+		else if (tmp_line.indexOf(SD_FILE_FRAME_DATA_SEPERATOR) > 0) {
     if(row_counter >= tmp_header.frame_data_h){
       continue;
       }
@@ -375,16 +400,16 @@ if(tmp_header.frame_data_w > TOTAL_MATRIX_WIDHT){
 			for (size_t i = 0; i < tmp_header.frame_data_w; i++)
 			{
 				size_t os = ((row_counter * tmp_header.frame_data_w) + i) + next_data_offset;
-				unsigned char read_value = (unsigned char)getValue(tmp_line, ',', i).toInt();
+				unsigned char read_value = (unsigned char)getValue(tmp_line, SD_FILE_FRAME_DATA_SEPERATOR, i).toInt();
 				write_to_ram(os, read_value);
 #ifdef _SER_DEBUG_
-				Serial.print("write cell at "); Serial.print(os); Serial.print(" is "); Serial.println(read_value);
+				//Serial.print("write cell at "); Serial.print(os); Serial.print(" is "); Serial.println(read_value);
 #endif
 			}
 			row_counter++;
       
 		}
-		else //if (tmp_line == "" || myFile.available()) //seems to be an "" line in the cs project i have checked this twice
+		else
 		{
     row_counter = 0;
 			frame_started = false;
@@ -401,37 +426,44 @@ if(tmp_header.frame_data_w > TOTAL_MATRIX_WIDHT){
 	}
 	myFile.close();
 }
-void read_frame_to_layer(unsigned int _animation_id, unsigned int _frame_id, unsigned int _layer_id, int additional_offset = 0, SD_FRAME_HEADER* _head = NULL) {
+void read_frame_to_layer(unsigned int _frame_id, unsigned int _layer_id,unsigned int additional_offset = 0, SD_FRAME_HEADER* _head = nullptr) {
 	//Serial.println("----------------------------");
 	SD_FRAME_HEADER tmp;
-	unsigned int  search_offset = 0;
+	unsigned int  search_offset = additional_offset;
 	tmp.read_ram(search_offset);
 	//tmp.print_header();
-
+	
 	//SEARCH FOR OFFSET
 	while (true)
 	{
-		if (tmp.animation_id == _animation_id && tmp.frame_curr == _frame_id) {
+		if ( tmp.frame_curr == _frame_id) {
 			//Serial.println("FRAME  FOUND");
 			break;
 		}
 		tmp.read_ram(search_offset);
-		if (tmp.animation_id == _animation_id && tmp.frame_curr == _frame_id) {
-		//	Serial.println("FRAME  FOUND 1");
+		if ( tmp.frame_curr == _frame_id) {
+		//Serial.println("FRAME  FOUND 1");
 			break;
 		}
-		search_offset += sizeof(SD_FRAME_HEADER) + (tmp.frame_data_w*tmp.frame_data_h * sizeof(byte));
-		if (search_offset >= RAM_SIZE) {
-			Serial.println("FRAME NOT FOUND");
+		//break at end of animation
+		if (search_offset >= RAM_SIZE || search_offset >= ((tmp.frame_data_h* tmp.frame_data_w * sizeof(byte) * tmp.frame_max + 1) + (sizeof(SD_FRAME_HEADER)* tmp.frame_max))+ additional_offset) {
+			Serial.println("FRAME NOT FOUND SKIP FRAME");
 			return;
 		}
-
+		search_offset += sizeof(SD_FRAME_HEADER) + (tmp.frame_data_w*tmp.frame_data_h * sizeof(byte));
 
 	};
-	//tmp.print_header();
-//	Serial.println(search_offset);
-	//WRITE DATA TO LAYER
+
+	
+	//Serial.println();
 	*_head = tmp;
+	if (tmp.frame_visibility >= 0.0f) {
+		layer_intense[_layer_id] = (1.0f / (float)tmp.frame_visibility);
+	}
+	else {
+		Serial.println(F("READ FRAME TO LAYER - DIV 0"));
+		layer_intense[_layer_id] = 1.0f;
+	}
 	int cell_offset = 0;
 	for (size_t i = 0; i < tmp.frame_data_w; i++)
 	{
@@ -441,7 +473,7 @@ void read_frame_to_layer(unsigned int _animation_id, unsigned int _frame_id, uns
 
 	//		Serial.print(cell_offset); Serial.print("("); Serial.print(read_from_ram(cell_offset)); Serial.print(") ");
 			if (cell_offset >= RAM_SIZE) {
-				Serial.println("FRAME NOT FOUND");
+				Serial.println("FRAME NOT FOUND - SKIP FRAME");
 				return;
 			}
 			set_layer_color(_layer_id, i, j, read_from_ram(cell_offset));
@@ -453,6 +485,48 @@ void read_frame_to_layer(unsigned int _animation_id, unsigned int _frame_id, uns
 	int t = 0;
 }
 
+//RAM POS VARS
+unsigned int written_colors = 0;
+unsigned int next_free_after_color_table = 0;
+
+bool load_color_table(const char* _path, unsigned int _write_offset = 0, unsigned int* _next_data_start = nullptr, unsigned int* _loaded_colors = nullptr) {
+	File myFile;
+	myFile = SD.open(_path);
+	if (!myFile) {
+		Serial.println(F("FILE CANNOT BE OPEN"));
+		return false;
+	}
+	unsigned int next_data_pos = _write_offset;
+	unsigned int lines = 0;
+	if (_loaded_colors != nullptr) {
+		*_loaded_colors = 0;
+	}
+	FRM_COLOR tmp_col;
+	while (myFile.available()) {
+				String tmp_line = "";
+				tmp_line = myFile.readStringUntil(SD_FILE_NEW_LINE_CHAR);
+				//Serial.println(tmp_line);
+				write_to_ram(next_data_pos + 0, (unsigned char)getValue(tmp_line, SD_FILE_CSV_SEPERATION_CHAR, 0).toInt());
+				write_to_ram(next_data_pos + 1, (unsigned char)getValue(tmp_line, SD_FILE_CSV_SEPERATION_CHAR, 1).toInt());
+				write_to_ram(next_data_pos + 2, (unsigned char)getValue(tmp_line, SD_FILE_CSV_SEPERATION_CHAR, 2).toInt());
+				//Serial.println(next_data_pos);		
+				next_data_pos += 3;
+				lines++;
+	}
+	
+
+	if (_next_data_start != nullptr) {
+		*_next_data_start = next_data_pos;
+	}
+	if (_loaded_colors != nullptr) {
+		*_loaded_colors = lines;
+	}
+	myFile.close();
+	return true;
+}
+
+
+
 
 int anim_counter = 0;
 int max_anim = 0;
@@ -461,10 +535,16 @@ unsigned long previousMillis = 0;
 const long interval = 1000;
 
 
+SD_FRAME_HEADER* animation_frame = nullptr;
+
+
+
 void setup()
 {
-  
-  Serial.begin(115200);
+	animation_frame = new SD_FRAME_HEADER();
+	animation_frame->frame_delay = 100;
+
+  Serial.begin(SERIAL_BAUD_RATE);
   #ifdef _SER_DEBUG_
   Serial.println(F("INIT LED MATRIX"));
 #endif
@@ -489,76 +569,70 @@ digitalWrite(FRAMERATE_OUTPUT_PIN, framerate_output_state);
   clear_all_layers();
   clear_output_layer();
   //INIT LAYER INTENSES
-  for (size_t i = 0; i < COUNT_OF_LAYERS; i++)
-  {
-	  layer_intense[i] = 1.0f;
-  }
+  for (size_t i = 0; i < COUNT_OF_LAYERS; i++){layer_intense[i] = 1.0f;}
   //YES DIRTY
 #ifdef ENABLE_OUTPUT_INTENSE
   output_layer_intense = 1.0f;
 #endif // ENABLE_OUTPUT_INTENSE
-  generate_output_layer();
-  show_output_layer();
 
 
-  delay(1000);
 
+#ifdef _SER_DEBUG_
+  Serial.println(F("INIT RAM"));
+#endif
+  init_ram();
 
 
 #ifdef _SER_DEBUG_
   Serial.println(F("INIT SD CARD"));
 #endif
-  init_ram();
+ 
 
   if (!SD.begin(SD_CARD_CS_PIN)) {
-	  Serial.println("initialization failed!");
+	  Serial.println("SD INI FAILED");
 	  return;
   }
-  //LOAD ANIATION TO SD CARD
-  write_sd_animation_to_sram("test.txt", NULL,0, 0);
+
+  //LOAD COLOR TABLE
+  if (!load_color_table(SD_FILE_DEF_COLOR_TABLE, RAM_COLOR_TABLE_OFFSET,&next_free_after_color_table, &written_colors)) {
+	  Serial.println("color table >COLORS.csv<  loading error");
+	  return;
+  }
+
+  Serial.print("READ COLOR ID:"); Serial.print(RAM_COLOR_TABLE_OFFSET + (1 * 3) + 0);
+  Serial.print(" R:"); Serial.print(read_from_ram(RAM_COLOR_TABLE_OFFSET + (1 * 3) + 0));
+  Serial.print(" G:"); Serial.print(read_from_ram(RAM_COLOR_TABLE_OFFSET + (1 * 3) + 1));
+  Serial.print(" B:"); Serial.println(read_from_ram(RAM_COLOR_TABLE_OFFSET + (1 * 3) + 2));
 
 
-  //if a gpio is high it goes to serial mode with set,<frameoffset>,<pixelid>,<pixelcolor>
-  //copy all data from eeprom to sram all bytes!
-  SD_FRAME_HEADER tmp;
-  read_frame_to_layer(0, 1, 0, 0, &tmp);
- // layer_write_to_serial(0);
+
+  //LOAD ANIATION TO SD CARD //WRITE ANIMATION AT THE POSTION AFTER THE COLOR TABLE
+  write_sd_animation_to_sram("TEST.ANI", NULL, 0, next_free_after_color_table);
 
 
 
-  max_anim = tmp.frame_max;
+
+  read_frame_to_layer(anim_counter, 0, next_free_after_color_table, animation_frame);
+
+
+
+
+  max_anim = animation_frame->frame_max;
  
-
-
-
-
- 
-
-
-
-	
-
-
-
   generate_output_layer();
   show_output_layer();
-
-  delay(100);
+  layer_write_to_serial(0);
 }
 
-
-
-
-
 void loop(){
-	
+
 	unsigned long currentMillis = millis();
 
-if((currentMillis - previousMillis) > 100){
-		// save the last time you blinked the LED
+if((currentMillis - previousMillis) > animation_frame->frame_delay){
+	
 		previousMillis = currentMillis;
-	//	Serial.println("TICK");
-		read_frame_to_layer(0, anim_counter, 0, 0);
+		Serial.println(animation_frame->frame_delay);
+		read_frame_to_layer(anim_counter, 0, next_free_after_color_table, animation_frame);
 		anim_counter++;
 		if (anim_counter >= max_anim) {
 			anim_counter = 0;

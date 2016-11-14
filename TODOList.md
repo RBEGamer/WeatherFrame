@@ -28,13 +28,10 @@
 * matrix wh auf 255 limiten
 
 
-* add color button adden
--> colo picker farbe wählen und dann im array nach der nächsten verfügbaren farbe suchen wenn abstand zur gross zum array hinzufügen
--> color tbale zum ram dazuzählen
+* das move ment einfach per offset rechnen machen aber die animation trotzdem komplett laden
+* in den header einen offset einrechnen
 
 
-->wenn beendet schreibe neue color table to basic color table
--> bmp import ->expand color table -> singe bmp eg 16x16 or multiframe bmp 16x512
 
 
 
