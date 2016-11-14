@@ -28,7 +28,8 @@ namespace LED_FRAME_BUILDER
         {
            public  int[,] matrix_cid;
            public string layer_name;
-
+            public int visibilty;
+            public int delay;
         }
 
         List<layer> layers = new List<layer>();
@@ -39,6 +40,8 @@ namespace LED_FRAME_BUILDER
         int current_selected_layer = 0;
         const int clear_color_id = 0;
         int last_selected_layer = 0;
+
+
         private void build_color_table()
         {
             //TODO load from color table file ->input excel string
@@ -101,37 +104,83 @@ namespace LED_FRAME_BUILDER
 
 private bool AreColorsSimilar(Color c1, Color c2, int tolerance)
  {
-     return Math.Abs(c1.R - c2.R) < tolerance &&
-            Math.Abs(c1.G - c2.G) < tolerance &&
-            Math.Abs(c1.B - c2.B) < tolerance;
+             return Math.Abs(c1.R - c2.R) < tolerance && Math.Abs(c1.G - c2.G) < tolerance && Math.Abs(c1.B - c2.B) < tolerance;
  }
 
 
 
         private void export_layers()
         {
-            string matrix_data = "";
-            for (int i = 0; i < layers.Count; i++)
+            //get sel layer coutn
+            saveFileDialog1.Filter = "FRAME_BUIDER_ANIMATION_FILE (.anim) | *.anim";
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
+                if (!saveFileDialog1.CheckPathExists)
+                {
+                    MessageBox.Show("EXPORT FAILED - path does not exits");
+                    return;
+                }
 
-                matrix_data += "FRAME_" + i.ToString() + "_"+ layers.Count.ToString() + "_" + matrix_size_w.ToString() + "_" + matrix_size_h.ToString() + "_" + "\n";
+               
 
 
+               if (exp_layer_cboxlist.CheckedItems.Count <= 0)
+            {
+                MessageBox.Show("EXPORT FAILED - PLEASE SELECTE A LAYER TO EXPORT");
+                return;
+            }
+            if (exp_layer_cboxlist.CheckedItems.Count > layers.Count)
+            {
+                MessageBox.Show("EXPORT FAILED - INTERNAL ERROR");
+                return;
+            }
+
+            string matrix_data = "";
+            for (int i = 0; i < exp_layer_cboxlist.CheckedItems.Count; i++)
+            {
+                matrix_data += "FRAME_" + i.ToString() + "_"+ exp_layer_cboxlist.CheckedItems.Count + "_" + matrix_size_w.ToString() + "_" + matrix_size_h.ToString() + "_" + (int)layers[exp_layer_cboxlist.CheckedIndices[i]].visibilty + "_" + (int)layers[exp_layer_cboxlist.CheckedIndices[i]].delay + "_" + "\n";
+                int layer_id = 0;
+               
                 for (int x = 0; x < matrix_size_w; x++)
                 {
                     for (int y = 0; y < matrix_size_h; y++)
                     {
-                        matrix_data += layers[i].matrix_cid[x, y].ToString() + ",";
+                        matrix_data += layers[exp_layer_cboxlist.CheckedIndices[i]].matrix_cid[x, y].ToString() + ",";
                     }
                     matrix_data += "\n";
                 }
                 matrix_data += "\n";
             }
-
-            saveFileDialog1.Filter = "FRAME_BUIDER_ANIMATION_FILE (.anim) | *.anim";
-            if (saveFileDialog1.ShowDialog() == DialogResult.OK) { 
+           
                 System.IO.File.WriteAllText(saveFileDialog1.FileName, matrix_data);
-            }else
+
+
+
+                //NOW EXPORT COLOR TABLE
+                try
+                {
+                    FileStream fileStream = File.Open("basic_color_table.csv", FileMode.Open);
+                    fileStream.SetLength(0);
+                    fileStream.Flush();
+                    string color_text = "";
+                    //CREATE COLOR TABLE
+                    for (int i = 0; i < colors.Count; i++)
+                    {
+                        color_text += colors[i].A.ToString() + ";" + colors[i].G.ToString() + ";" + colors[i].B.ToString() +";" + "\n";
+                    }
+                    char[] bla= color_text.ToCharArray();
+
+                    fileStream.Write(Encoding.UTF8.GetBytes(bla), 0, Encoding.UTF8.GetByteCount(bla));
+                    fileStream.Close();
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("EXPORT FAILED - basic_color_table.csv cant export");
+                    return;
+                }
+                
+            }
+            else
             {
                 MessageBox.Show("EXPORT FAILED");
             }
@@ -307,9 +356,15 @@ private bool AreColorsSimilar(Color c1, Color c2, int tolerance)
                 }
             }
             first_layer.layer_name =  "frame_" + layers.Count().ToString();
+            first_layer.visibilty = 255;
+            layer_visible_up.Value = 255;
+            first_layer.delay = 100;
+            layer_delay_ud.Value = 100;
             layers.Add(first_layer);
+
             layers_listbox.Items.Add(first_layer.layer_name);
             layers_listbox.SelectedIndex = 0;
+            exp_layer_cboxlist.Items.Add(first_layer.layer_name, true);
         }
         private void click_cell(object sender, EventArgs e) //EVENT
         {
@@ -353,23 +408,27 @@ private bool AreColorsSimilar(Color c1, Color c2, int tolerance)
                 }
             }
         }
-
         //ADD FRAME BTN
         private void button2_Click(object sender, EventArgs e)
         {
             last_selected_layer = current_selected_layer;
             layer tmp_layer = new layer();
             tmp_layer.layer_name = "frame_" + layers.Count.ToString();
+            tmp_layer.visibilty = 255;
+            tmp_layer.delay = 100;
+            layer_delay_ud.Value = 100;
+            layer_visible_up.Value = 255;
             tmp_layer.matrix_cid = new int[(int)matrix_size_widht.Value, (int)matrix_size_height.Value];
             layers.Add(tmp_layer);
             layers_listbox.Items.Add(tmp_layer.layer_name);
             layers_listbox.SelectedItem = tmp_layer.layer_name;
-
+            exp_layer_cboxlist.Items.Add(tmp_layer.layer_name, true);
            
             current_selected_layer = layers.Count-1;
-            if(copy_frame_data_chbx.Checked)
-            {
 
+            if (copy_frame_data_chbx.Checked)
+            {
+                tmp_layer.visibilty = layers[last_selected_layer].visibilty;
                 for (int i = 0; i < (int)matrix_size_widht.Value; i++)
                 {
                     for (int j = 0; j < (int)matrix_size_height.Value; j++)
@@ -378,8 +437,25 @@ private bool AreColorsSimilar(Color c1, Color c2, int tolerance)
                     }
                 }
             }
-        }
 
+            //TODO REPLACE WITH REF IN STRUCT
+            for (int i = 0; i < (int)matrix_size_widht.Value; i++)
+            {
+                for (int j = 0; j < (int)matrix_size_height.Value; j++)
+                {
+                    for (int k = 0; k < matrix_panel.Controls.Count; k++)
+                    {
+
+                        if (matrix_panel.Controls[k].Name == "mcell_" + i.ToString() + "_" + j.ToString())
+                        {
+                            matrix_panel.Controls[k].BackColor = colors[layers[current_selected_layer].matrix_cid[i, j]];
+                        }
+                    }
+                }
+            }
+
+
+        }
         //REMOVE FRAME BTN
         private void button3_Click(object sender, EventArgs e)
         {
@@ -390,8 +466,9 @@ private bool AreColorsSimilar(Color c1, Color c2, int tolerance)
         {
             ListBox llistbox = (ListBox)sender;
             last_selected_layer = current_selected_layer;
-
             current_selected_layer = llistbox.SelectedIndex;
+            layer_visible_up.Value = layers[current_selected_layer].visibilty;
+            layer_delay_ud.Value = layers[current_selected_layer].delay;
             //TODO REPLACE WITH REF IN STRUCT
            for (int i = 0; i < (int)matrix_size_widht.Value; i++)
             {
@@ -412,7 +489,7 @@ private bool AreColorsSimilar(Color c1, Color c2, int tolerance)
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            // TODO ADD IMPORT COLOOR TABLE
         }
 
         private void speichernToolStripMenuItem_Click(object sender, EventArgs e)
@@ -433,6 +510,267 @@ private bool AreColorsSimilar(Color c1, Color c2, int tolerance)
         private void speichernunterToolStripMenuItem_Click(object sender, EventArgs e)
         {
             export_layers();
+        }
+
+        private void openBMPToLayerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(layers.Count <= 0)
+            {
+                MessageBox.Show("BMP IMPORT FAILED - please add a layer");
+                return;
+            }
+
+
+            openFileDialog1.FileName = "";
+            openFileDialog1.Filter = "BITMAP (.bmp) | *.bmp";
+
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                Bitmap image = new Bitmap(openFileDialog1.FileName);
+                int parse_size_w = image.Width;
+                int parse_size_h = image.Height;
+                if(parse_size_w <= 0 && parse_size_h <= 0)
+                {
+                    MessageBox.Show("BMP IMPORT FAILED");
+                    return;
+                }
+
+                if(parse_size_w != parse_size_h /*&&*/ ) //Math.Sqrt(parse_size_h) % 2) == 0)
+                {
+                    MessageBox.Show("BMP IMPORT ERROR - BMP IS NOT A QUARE");
+                    return;
+                }
+
+                if(parse_size_w > matrix_size_w)
+                {
+                    parse_size_w = matrix_size_w;
+                }
+
+                if (parse_size_h > matrix_size_h)
+                {
+                    parse_size_h = matrix_size_h;
+                }
+                int color_pw = color_chooser.Size.Width / 32;
+                int color_ph = colors.Count / color_pw;
+
+
+                for (int i = 0; i < parse_size_w; i++)
+                {
+                    for (int j = 0; j < parse_size_h; j++)
+                    {
+                        Color tmp_col = image.GetPixel(i, j);
+                        int color_id_to_write = 0;
+                        bool col_simi = false;
+                        for (int k = 0; k < colors.Count; k++)
+                        {
+                            if(AreColorsSimilar(tmp_col, colors[k], 20))
+                            {
+                                color_id_to_write = k;
+                                col_simi = true;
+                                break;
+                            }
+                        }
+
+                        if (!col_simi)
+                        {
+                            PictureBox pic = new PictureBox();
+                            pic.Name = "colorpick_" + colors.Count.ToString();
+                            pic.Size = new Size(32, 32);
+                            pic.Location = new Point((colors.Count % color_pw) * 32, (colors.Count / color_ph) * 32);
+                            pic.Click += click_color;
+                            color_chooser.Controls.Add(pic);
+                            colors.Add(tmp_col);
+                            pic.BackColor = colors[colors.Count - 1];
+                            color_id_to_write = colors.Count - 1;
+                        }
+
+
+
+
+                        //add color to layer
+                        layers[current_selected_layer].matrix_cid[i, j] = color_id_to_write;
+                        
+                    }
+                }
+                // erst color table
+                //dann id schreiben
+
+            }
+
+           
+            //TODO REPLACE WITH REF IN STRUCT
+            for (int i = 0; i < (int)matrix_size_widht.Value; i++)
+            {
+                for (int j = 0; j < (int)matrix_size_height.Value; j++)
+                {
+                    for (int k = 0; k < matrix_panel.Controls.Count; k++)
+                    {
+
+                        if (matrix_panel.Controls[k].Name == "mcell_" + i.ToString() + "_" + j.ToString())
+                        {
+                            matrix_panel.Controls[k].BackColor = colors[layers[current_selected_layer].matrix_cid[i, j]];
+                        }
+                    }
+                }
+            }
+
+
+
+
+        }
+
+        private void dateiToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void importMultiframeBitmapToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //split into layer size this must fir
+            //for each thing add new layer 
+            //make color table
+            openFileDialog1.FileName = "";
+            openFileDialog1.Filter = "BITMAP (.bmp) | *.bmp";
+
+            if(matrix_size_w <= 0 || matrix_size_h <= 0)
+            {
+                MessageBox.Show("MULTI FRAME BMP IMPORT FAILED - PLEASE SET THE MATRIX SIZE TO YOUR FRAME SIZE AND CREATE A NEW FILE");
+                return;
+            }
+
+
+
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                Bitmap image = new Bitmap(openFileDialog1.FileName);
+
+                int sprites_w = image.Width / matrix_size_w;
+                int sprites_h = image.Height / matrix_size_h;
+                int color_pw = color_chooser.Size.Width / 32;
+                int color_ph = colors.Count / color_pw;
+
+                bool cbx_state = copy_frame_data_chbx.Checked;
+                copy_frame_data_chbx.Checked = false;
+                if (layers.Count <= 0)
+                {
+                    set_matrix_size_btn_Click(null, null); //CREATE NEW PAGE
+                }
+                current_selected_layer = 0;
+ 
+
+                for (int sph = 0; sph < sprites_h; sph++)
+                {
+                    for (int spw = 0; spw < sprites_w; spw++)
+                {
+                        if (current_selected_layer > layers.Count - 1)
+                        {
+                            button2_Click(null, null);
+                        }
+
+                        for (int x = 0; x < matrix_size_w; x++)
+                        {
+                            for (int y = 0; y < matrix_size_h; y++)
+                            {
+                                int rx = (spw * matrix_size_w) + x;
+                                int ry = (sph * matrix_size_h) + y;
+
+
+                                Color tmp_col = image.GetPixel(rx, ry);
+                                int color_id_to_write = 0;
+                                bool col_simi = false;
+                                for (int k = 0; k < colors.Count; k++)
+                                {
+                                    if (AreColorsSimilar(tmp_col, colors[k], 20))
+                                    {
+                                        color_id_to_write = k;
+                                        col_simi = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!col_simi)
+                                {
+                                    PictureBox pic = new PictureBox();
+                                    pic.Name = "colorpick_" + colors.Count.ToString();
+                                    pic.Size = new Size(32, 32);
+                                    pic.Location = new Point((colors.Count % color_pw) * 32, (colors.Count / color_ph) * 32);
+                                    pic.Click += click_color;
+                                    color_chooser.Controls.Add(pic);
+                                    colors.Add(tmp_col);
+                                    pic.BackColor = colors[colors.Count - 1];
+                                    color_id_to_write = colors.Count - 1;
+                                }
+
+
+
+
+                                //add color to layer
+                                layers[current_selected_layer].matrix_cid[x, y] = color_id_to_write;
+
+
+                            }
+                        }
+
+                        //new layer;
+
+                        current_selected_layer++;
+
+
+
+                    }
+                }
+
+                //restore cbx
+                copy_frame_data_chbx.Checked = cbx_state;
+            }
+        }
+
+        private void layer_visible_up_ValueChanged(object sender, EventArgs e)
+        {
+           layer l = layers[current_selected_layer];
+            l.visibilty = (int)layer_visible_up.Value;
+            layers[current_selected_layer] = l;
+        }
+
+        private void layer_delay_ud_ValueChanged(object sender, EventArgs e)
+        {
+            layer l = layers[current_selected_layer];
+            l.delay = (int)layer_delay_ud.Value;
+            layers[current_selected_layer] = l;
+        }
+
+        private void addColorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            colorDialog1.SolidColorOnly = true;
+            if (colorDialog1.ShowDialog() == DialogResult.OK)
+            {
+                int color_pw = color_chooser.Size.Width / 32;
+                int color_ph = colors.Count / color_pw;
+                Color tmp_col =colorDialog1.Color;
+                int color_id_to_write = 0;
+                bool col_simi = false;
+                for (int k = 0; k < colors.Count; k++)
+                {
+                    if (AreColorsSimilar(tmp_col, colors[k], 40))
+                    {
+                        color_id_to_write = k;
+                        col_simi = true;
+                        break;
+                    }
+                }
+                if (!col_simi)
+                {
+                    PictureBox pic = new PictureBox();
+                    pic.Name = "colorpick_" + colors.Count.ToString();
+                    pic.Size = new Size(32, 32);
+                    pic.Location = new Point((colors.Count % color_pw) * 32, (colors.Count / color_ph) * 32);
+                    pic.Click += click_color;
+                    color_chooser.Controls.Add(pic);
+                    colors.Add(tmp_col);
+                    pic.BackColor = colors[colors.Count - 1];
+                    color_id_to_write = colors.Count - 1;
+                }
+            }
         }
     }
 }

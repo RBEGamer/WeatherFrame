@@ -19,3 +19,9 @@ C:\Users\marcel\Desktop\WeatherFrame\win_csharp_src\LED_FRAME_BUILDER\LED_FRAME_
 C:\Users\marcel\Desktop\WeatherFrame\src\frame_builder_src\LED_FRAME_BUILDER\LED_FRAME_BUILDER\bin\Debug\LED_FRAME_BUILDER.exe.config
 C:\Users\marcel\Desktop\WeatherFrame\src\frame_builder_src\LED_FRAME_BUILDER\LED_FRAME_BUILDER\obj\Debug\LED_FRAME_BUILDER.exe
 C:\Users\marcel\Desktop\WeatherFrame\src\frame_builder_src\LED_FRAME_BUILDER\LED_FRAME_BUILDER\obj\Debug\LED_FRAME_BUILDER.pdb
+C:\Users\marcel\Desktop\WeatherFrame\src\frame_builder_src\LED_FRAME_BUILDER\LED_FRAME_BUILDER\bin\Debug\LED_FRAME_BUILDER.exe
+C:\Users\marcel\Desktop\WeatherFrame\src\frame_builder_src\LED_FRAME_BUILDER\LED_FRAME_BUILDER\bin\Debug\LED_FRAME_BUILDER.pdb
+C:\Users\marcel\Desktop\WeatherFrame\src\frame_builder_src\LED_FRAME_BUILDER\LED_FRAME_BUILDER\obj\Debug\LED_FRAME_BUILDER.csprojResolveAssemblyReference.cache
+C:\Users\marcel\Desktop\WeatherFrame\src\frame_builder_src\LED_FRAME_BUILDER\LED_FRAME_BUILDER\obj\Debug\LED_FRAME_BUILDER.Form1.resources
+C:\Users\marcel\Desktop\WeatherFrame\src\frame_builder_src\LED_FRAME_BUILDER\LED_FRAME_BUILDER\obj\Debug\LED_FRAME_BUILDER.Properties.Resources.resources
+C:\Users\marcel\Desktop\WeatherFrame\src\frame_builder_src\LED_FRAME_BUILDER\LED_FRAME_BUILDER\obj\Debug\LED_FRAME_BUILDER.csproj.GenerateResource.Cache

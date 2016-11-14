@@ -21,17 +21,17 @@
 -> add clock mode
 
 -> extra debug func print to serial adden ink line and func name
+
 ## FRAME_BUILDER GUI
 
 * max 255 layer
-* limit sram adden
 * matrix wh auf 255 limiten
 
 
 * add color button adden
 -> colo picker farbe wählen und dann im array nach der nächsten verfügbaren farbe suchen wenn abstand zur gross zum array hinzufügen
 -> color tbale zum ram dazuzählen
-->add delay to layer header
+
 
 ->wenn beendet schreibe neue color table to basic color table
 -> bmp import ->expand color table -> singe bmp eg 16x16 or multiframe bmp 16x512
