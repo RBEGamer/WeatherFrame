@@ -532,7 +532,7 @@ int anim_counter = 0;
 int max_anim = 0;
 
 unsigned long previousMillis = 0;
-const long interval = 1000;
+
 
 
 SD_FRAME_HEADER* animation_frame = nullptr;
@@ -628,7 +628,7 @@ void loop(){
 
 	unsigned long currentMillis = millis();
 
-if((currentMillis - previousMillis) > animation_frame->frame_delay){
+if((currentMillis - previousMillis) > animation_frame->frame_delay*3){
 	
 		previousMillis = currentMillis;
 		Serial.println(animation_frame->frame_delay);
