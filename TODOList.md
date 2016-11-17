@@ -29,6 +29,7 @@
 
 ## FRAME_BUILDER GUI
 
+* change file format to wfa -> anim already used
 * max 255 layer
 * matrix wh auf 255 limiten
 
