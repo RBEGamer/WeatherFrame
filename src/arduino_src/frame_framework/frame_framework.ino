@@ -526,6 +526,15 @@ bool load_color_table(const char* _path, unsigned int _write_offset = 0, unsigne
 }
 
 
+struct CONFIG_HEADER
+{
+
+};
+
+bool load_config_file(const char* _path) {
+
+	return true;
+}
 
 
 int anim_counter = 0;
@@ -598,12 +607,6 @@ digitalWrite(FRAMERATE_OUTPUT_PIN, framerate_output_state);
 	  Serial.println("color table >COLORS.csv<  loading error");
 	  return;
   }
-
-  Serial.print("READ COLOR ID:"); Serial.print(RAM_COLOR_TABLE_OFFSET + (1 * 3) + 0);
-  Serial.print(" R:"); Serial.print(read_from_ram(RAM_COLOR_TABLE_OFFSET + (1 * 3) + 0));
-  Serial.print(" G:"); Serial.print(read_from_ram(RAM_COLOR_TABLE_OFFSET + (1 * 3) + 1));
-  Serial.print(" B:"); Serial.println(read_from_ram(RAM_COLOR_TABLE_OFFSET + (1 * 3) + 2));
-
 
 
   //LOAD ANIATION TO SD CARD //WRITE ANIMATION AT THE POSTION AFTER THE COLOR TABLE
