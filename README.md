@@ -73,16 +73,13 @@ For further build instructions,please see the pictures at /images/
  * if necessary edit the matrix settings (`VISIBLE_MATRIX_WITH`, `VISIBLE_MATRIX_HEIGHT`, `MATRIX_ORIGIN_LEFT_UP`, `MATRIX_MODE_ROW`)
  * if your leds has no row/collum order you can use a lookuptable for the right id, see the comments at `USE_LED_LOOKUP`
  
-# COLOR TABLE
- * the standard color table are located at `/tools/nes_color_table.xlsx`
- * the maximum amount of color are 256 (1. ubyte)
- * to add a color simply add in the nes_color_table_file the rgb values and export it as csv
- * load the csv to the LED_FRAME_BUILDER and copy the imported string (red cell) to the arduino sketch
+
  
 # ANIMATION SETUP | ADD/EDIT ANIMATIONS
- * with this tool you can simply create a animation set for the WeatherFrame
- * open the tool and load a color table (a example table is in `/tools/nes_color_table.csv`)
- * click File->New to create a 8x8 matrix (you can edit the size at the `SIZE TAB`)
+* Download and install the custom animation tool PixelFRameAnimator https://github.com/RBEGamer/PixelFrameAnimator
+* Set the size at the settings tab to the size of your weather frame
+* Draw your Frames or import BMP Files
+* Export the File and save it to your sd card
 
 
 ### INFO ABOUT ANIMATIONS SRAM PIXELS
