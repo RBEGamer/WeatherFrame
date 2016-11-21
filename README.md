@@ -42,6 +42,11 @@ For further build instructions,please see the pictures at /images/
  * Adafruit-NeoPixel Libary : https://github.com/adafruit/Adafruit_NeoPixel
  * SDFat Libary : https://github.com/greiman/SdFat
  
+### VS-PROJECT
+ * in the `src/arduino_src` is a Visual-Studio project attached too because i am using VisualMicro for Arduino developing
+ http://www.visualmicro.com
+ 
+
 # BUILD INSTRUCTION
  * Print all needed 3D Parts at the `/3d_parts/` directory 
  * 64x ´single_frame.stl´ but this depent on your matrix size
