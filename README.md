@@ -37,13 +37,13 @@ For further build instructions,please see the pictures at /images/
  * Drill 6mm
 
 # NEEDED SOFTWARE
- * latest Arduino IDE
+ * latest Arduino IDE : https://www.arduino.cc
  * SPI-SRAM Libary : http://playground.arduino.cc/Main/SpiRAM
  * Adafruit-NeoPixel Libary : https://github.com/adafruit/Adafruit_NeoPixel
  * SDFat Libary : https://github.com/greiman/SdFat
  
 ### VS-PROJECT
- * in the `src/arduino_src` is a Visual-Studio project attached too because i am using VisualMicro for Arduino developing
+ * in the `src/arduino_src` is a Visual-Studio project attached too because i am using VisualMicro for Arduino developing :
  http://www.visualmicro.com
  
 
