@@ -87,7 +87,7 @@ For further build instructions,please see the pictures at /images/
 * Export the File and save it to your sd card
 
 
-### INFO ABOUT ANIMATIONS SRAM PIXELS
+### INFO ABOUT ANIMATION,RAM AND PIXELS [OLD VERSION]
  * each animation can have up to 256 frame with a matrix size of `256x256 pixels
  * the maximum space for this setup is `256(frames)*256(W)*256(H)*1(COLOR)+ 256(FRAMES)*5(HEADER) = 17.564KByte`  but that wont fit into your SRAM
  * for a typical animation of 5 frames @ 8x8 pixel + Header will require 328 Byte of SRAM so the 32K256 IC can hold up to 99 animations
