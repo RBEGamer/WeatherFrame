@@ -47,7 +47,7 @@ For further build instructions,please see the pictures at /images/
  * 64x ´single_frame.stl´ but this depent on your matrix size
  * glue all singe_frame pieces together (see `/images/`)
  * glue the leds int the holes of your glued matrix
- * wire your leds up (DO -> DI, GND->GND, V+ -> V+)
+ * wire your leds up (`DO -> DI`, `GND->GND`, `V+ -> V+`)
  * connect the DI of your first LED with pin 5 of the ESP (see the `WS2812_PIN define`)
  * connect the SDCard reader with ESP SPI Bus and the CS pin to pin 5 (see the `SD_CARD_CS_PIN define`)
  * connect the SRAM Chip to the SPI Bus and the CS pin to pin 3 (see the ´SRAM_CS_PIN define´)
