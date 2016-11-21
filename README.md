@@ -51,7 +51,7 @@ For further build instructions,please see the pictures at /images/
  * connect the DI of your first LED with pin 5 of the ESP (see the `WS2812_PIN define`)
  * connect the SDCard reader with ESP SPI Bus and the CS pin to pin 5 (see the `SD_CARD_CS_PIN define`)
  * connect the SRAM Chip to the SPI Bus and the CS pin to pin 3 (see the ´SRAM_CS_PIN define´)
- * glue the ESP, SDCARD, SRAM IC to the back of your matri
+ * glue the ESP, SDCARD, SRAM IC to the back of your matrix
  * upload the firmware
 
 # SOFTWARE SETUP
@@ -76,7 +76,7 @@ For further build instructions,please see the pictures at /images/
 
  
 # ANIMATION SETUP | ADD/EDIT ANIMATIONS
-* Download and install the custom animation tool PixelFRameAnimator https://github.com/RBEGamer/PixelFrameAnimator
+* Download and install the custom animation tool PixelFrameAnimator https://github.com/RBEGamer/PixelFrameAnimator
 * Set the size at the settings tab to the size of your weather frame
 * Draw your Frames or import BMP Files
 * Export the File and save it to your sd card
