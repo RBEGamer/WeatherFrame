@@ -19,6 +19,8 @@
 -> für dem ram eine usage table adden die angibt wie viele byte unangefasst sind
 -> free methode hinzufügen ??
 
+->  LOAD COLOR TABLE FROM FILE DIRECTLY
+
 
 -> add rainmow mode
 -> add clock mode
@@ -36,7 +38,7 @@
 
 * das move ment einfach per offset rechnen machen aber die animation trotzdem komplett laden
 * in den header einen offset einrechnen
-
+* color tbale in export rein und eine basic color tbale
 
 
 
