@@ -20,8 +20,7 @@
 -> free methode hinzufügen ??
 
 
--> add rainmow mode
--> add clock mode
+
 -> extra debug func print to serial adden ink line and func name
 
 
@@ -29,19 +28,25 @@
 
 ## FRAME_BUILDER GUI
 
-* max 255 layer
-* matrix wh auf 255 limiten
-
-
+* add playback mode
 * das move ment einfach per offset rechnen machen aber die animation trotzdem komplett laden
 * in den header einen offset einrechnen
+* color table in exported reinmachen COLOR_id_R_G_B
+* import / export csv
+* ASE IMPORT
 
+
+
+* create console parameter app
+* cerate.net core export lib
 
 
 
 
 
 # planned
+
+
 -> rainbow mode
 -> start stop next animation button
 -> weather mode
