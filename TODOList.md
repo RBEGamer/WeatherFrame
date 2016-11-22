@@ -19,6 +19,8 @@
 -> für dem ram eine usage table adden die angibt wie viele byte unangefasst sind
 -> free methode hinzufügen ??
 
+->  LOAD COLOR TABLE FROM FILE DIRECTLY
+
 
 
 -> extra debug func print to serial adden ink line and func name
@@ -28,6 +30,7 @@
 
 ## FRAME_BUILDER GUI
 
+<<<<<<< HEAD
 * add playback mode
 * das move ment einfach per offset rechnen machen aber die animation trotzdem komplett laden
 * in den header einen offset einrechnen
@@ -36,6 +39,16 @@
 * ASE IMPORT
 
 
+=======
+* change file format to wfa -> anim already used
+* max 255 layer
+* matrix wh auf 255 limiten
+
+
+* das move ment einfach per offset rechnen machen aber die animation trotzdem komplett laden
+* in den header einen offset einrechnen
+* color tbale in export rein und eine basic color tbale
+>>>>>>> origin/master
 
 * create console parameter app
 * cerate.net core export lib
