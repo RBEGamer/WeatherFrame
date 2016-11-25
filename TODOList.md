@@ -8,7 +8,7 @@
 
 
 * animation states states in extern eeprom sichern
-* load animation by animation from sd
+
 
 * add further header for animation config ->loop ->how many loops
 
@@ -16,14 +16,14 @@
 
 * port to esp
 
--> für dem ram eine usage table adden die angibt wie viele byte unangefasst sind
--> free methode hinzufügen ??
+* für dem ram eine usage table adden die angibt wie viele byte unangefasst sind
+* free methode hinzufügen ??
 
-->  LOAD COLOR TABLE FROM FILE DIRECTLY
+* create main file header for size info -> Colortable + animation + offsets
+* load the colortable first but this can be anywhre in the file!!!!
 
 
-
--> extra debug func print to serial adden ink line and func name
+* extra debug func print to serial adden ink line and func name
 
 
 
