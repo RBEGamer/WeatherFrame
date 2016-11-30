@@ -10,7 +10,7 @@ The weather data comes from openweathermap which required an valid api key (but 
 * 8x8 Pixels 
 * Framesize 25x25x4 cm
 * Can be build only with 3D Printed parts! Please see `/3d_parts/`
-For further build instructions,please see the pictures at /images/
+For further build instructions,please see the pictures at `/images/
 
 
 # PARTS (FOR 8x8 FRAME)
