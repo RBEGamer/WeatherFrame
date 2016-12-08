@@ -61,7 +61,7 @@ const int led_id_lookup[LED_COUNT] PROGMEM = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 
 unsigned char demo_ram[DEMO_RAM_SIZE];
 
-inline void write_to_ram(unsigned int _addr, unsigned char _value) {
+inline void write_byte_to_ram(unsigned int _addr, unsigned char _value) {
 	if (_addr > DEMO_RAM_SIZE - 1) {
 #ifdef _SER_DEBUG_
 		Serial.println(F("DEMO RAM - OUT OF RANGE"));
@@ -71,7 +71,7 @@ inline void write_to_ram(unsigned int _addr, unsigned char _value) {
 		demo_ram[_addr] = _value;
 	}
 }
-inline unsigned char read_from_ram(unsigned int _addr) {
+inline unsigned char read_byte_from_ram(unsigned int _addr) {
 	if (_addr > DEMO_RAM_SIZE - 1) {
 #ifdef _SER_DEBUG_
 		Serial.println(F("DEMO RAM - OUT OF RANGE"));
@@ -85,6 +85,30 @@ void init_ram() {
 		demo_ram[i] = DEMO_RAM_INIT_CHAR;
 	}
 }
+
+//template funk for all other types
+//template<typename T>
+//void write_type_to_ram(const unsigned int _start_addr,const T _type)
+//{
+//	byte* byte_p = (byte*)(void*)&_type;
+//	for (size_t i = 0; i < sizeof(_type); i++)
+//	{
+//		write_byte_to_ram(_start_addr+i, *byte_p++);
+//	}
+//}
+////template funk for all other types
+//template<typename T>
+//void read_type_from_ram(const unsigned int _start_addr, T* _type)
+//{
+//
+//	byte* byte_p = (byte*)(void*)_type;
+//	for (size_t i = 0; i < sizeof(T); i++)
+//	{
+//		*byte_p++ = read_byte_from_ram(_start_addr + i);
+//	}
+//
+//}
+
 #endif // !DEMO_RAM
 
 
@@ -157,18 +181,68 @@ struct SD_FRAME_HEADER {
 		Serial.print(F("FRAME_HEADER FOR ANIMATION:")); Serial.print(animation_id); Serial.print(F(" CURR:")); Serial.print(frame_curr); Serial.print(F(" FROM : ")); Serial.print(frame_max); Serial.print(F(" W : ")); Serial.print(frame_data_w); Serial.print(F(" H : ")); Serial.print(frame_data_h); Serial.print(F(" DELAY : ")); Serial.print(frame_delay); Serial.print(F(" VISIBLE : ")); Serial.println(frame_visibility);
 	}
 
-	void read_ram(const int _start_addr) {
-		animation_id = read_from_ram(_start_addr + 0);
-		frame_curr = read_from_ram(_start_addr + 1);
-		frame_max = read_from_ram(_start_addr + 2);
-		frame_data_w = read_from_ram(_start_addr + 3);
-		frame_data_h = read_from_ram(_start_addr + 4);
-		frame_visibility = read_from_ram(_start_addr + 5);
-		frame_delay = read_from_ram(_start_addr + 6);
+	void read_from_ram(const int _start_addr) {
+		animation_id = read_byte_from_ram(_start_addr + 0);
+		frame_curr = read_byte_from_ram(_start_addr + sizeof(animation_id));
+		frame_max = read_byte_from_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr));
+		frame_data_w = read_byte_from_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr) + sizeof(frame_max));
+		frame_data_h = read_byte_from_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr) + sizeof(frame_max) + sizeof(frame_data_w));
+		frame_visibility = read_byte_from_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr) + sizeof(frame_max) + sizeof(frame_data_w) + sizeof(frame_data_h));
+		frame_delay = read_byte_from_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr) + sizeof(frame_max) + sizeof(frame_data_w) + sizeof(frame_data_h) + sizeof(frame_visibility));
 	}
 
+	void write_to_ram(const int _start_addr) {
+		write_byte_to_ram(_start_addr, animation_id + 0);
+		write_byte_to_ram(_start_addr + sizeof(animation_id), frame_curr);
+		write_byte_to_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr), frame_max);
+		write_byte_to_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr) + sizeof(frame_max), frame_data_w);
+		write_byte_to_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr) + sizeof(frame_max) +  sizeof(frame_data_w), frame_data_h);
+		write_byte_to_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr) + sizeof(frame_max) + sizeof(frame_data_w) + sizeof(frame_data_h), frame_visibility);
+		write_byte_to_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr) + sizeof(frame_max) + sizeof(frame_data_w) + sizeof(frame_data_h) + sizeof(frame_visibility), frame_delay);
+	}
 };
+//
+struct ANIMATION_INFO_HEADER
+{
+	byte frame_w;
+	byte frame_h;
+	byte frames;
+	byte colors;
+	byte rgb_mode;
+	byte byte_size;
+	unsigned int data_offset;
+	unsigned int color_offset;
 
+
+	void write_to_ram(const unsigned int _start_addr ) {
+		write_byte_to_ram(_start_addr + 0, frame_w);
+		write_byte_to_ram(_start_addr + sizeof(frame_w), frame_h);
+		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h), frames);
+		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames),colors);
+		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors),rgb_mode);
+		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode), byte_size);
+		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size), data_offset);
+		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size) + sizeof(data_offset), color_offset);
+
+	}
+
+	void read_from_ram(const  unsigned int _start_addr) {
+		frame_w = read_byte_from_ram(_start_addr + 0);
+		frame_h = read_byte_from_ram(_start_addr + sizeof(frame_w));
+		frames = read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h));
+		colors = read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames));
+		rgb_mode = read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors));
+		byte_size = read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode));
+		data_offset = read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size));
+		color_offset= read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size) + sizeof(data_offset));
+	}
+
+
+	void print() {
+		Serial.print("HEADER :ASCIIHEADV2 frame_w:" + String(frame_w) + " frame_h:" + String(frame_h) + " frames:" + String(frames) + " colors:" + String(colors) + "rgb_mode:" + String(rgb_mode) + " byte_size:" + byte_size + " data_offset:" + String(data_offset) + " color_offset:" + String(color_offset));
+
+	}
+};
 
 
 //GET LED
@@ -255,9 +329,9 @@ void generate_output_layer(const bool _direct_show = false) {
 				if (layers[i][w][h] != clear_color_id) {
 					//color_lookup_table[
 					output_layer[w][h].set_color(
-						read_from_ram(RAM_COLOR_TABLE_OFFSET + (layers[i][w][h] * 3) + 0),
-						read_from_ram(RAM_COLOR_TABLE_OFFSET + (layers[i][w][h] * 3) + 1),
-						read_from_ram(RAM_COLOR_TABLE_OFFSET + (layers[i][w][h] * 3) + 2));
+						read_byte_from_ram(RAM_COLOR_TABLE_OFFSET + (layers[i][w][h] * 3) + 0),
+						read_byte_from_ram(RAM_COLOR_TABLE_OFFSET + (layers[i][w][h] * 3) + 1),
+						read_byte_from_ram(RAM_COLOR_TABLE_OFFSET + (layers[i][w][h] * 3) + 2));
 
 
 
@@ -346,104 +420,135 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 		Serial.println(F("FILE CANNOT BE OPEN"));
 		return;
 	}
-	SD_FRAME_HEADER tmp_header;
+	SD_FRAME_HEADER tmp_frame_header;
+	ANIMATION_INFO_HEADER tmp_anim_header;
 	bool frame_started = false;
-	unsigned int next_frame_offset = _animation_start_addr; //yeah startoffset ggf add further header offset
-	unsigned int next_data_offset = next_frame_offset + sizeof(SD_FRAME_HEADER);
-	if (_next_data_start != nullptr) {
-		*_next_data_start = next_data_offset + (1 * 1) * 1;
-	}
+
+	
 	int row_counter = 0;
 	bool was_info_header = false;
-	while (myFile.available()) {
 
+	unsigned int color_storage_offset = 0;
+	unsigned int data_storage_offset = 0;
+	unsigned int current_frame_data_offset = 0;
+
+	while (myFile.available()) {
+		int line_counter = 0;
 		//GET CURRENT LINE
 		String tmp_line = "";
 		tmp_line = myFile.readStringUntil(SD_FILE_NEW_LINE_CHAR);
-
-
-		if (tmp_line.indexOf(SD_FILE_FRAME_HEADER_SEPERATOR) > 0 && tmp_line.indexOf("INFO") > 0) {
-			//PARSE THER SIZE INFO
+		Serial.println(tmp_line);
+		//tmp_line.indexOf(SD_FILE_INFO_HEADER_SEPARATOR) > 0
+		if (  tmp_line.indexOf("ASCIIHEADV2") > 0 && tmp_line.indexOf(SD_FILE_INFO_HEADER_SEPARATOR) > 0 && !was_info_header) {
+			
+			Serial.println("2131212312131133123122131112312");//PARSE THER SIZE INFOc
 			//SET OFFSET DATA
 			//CHECK SIZE
 			//WRITE A RAM FREE % PERCENTAGE
+			String magic_word = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 0);
+			String verson_identifier = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 1);
+			
+			if (verson_identifier == "ASCIIHEADV2") {
+				Serial.print("HEADER VERSION :");Serial.println( verson_identifier);
+				tmp_anim_header.frame_w = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 2).toInt();
+				tmp_anim_header.frame_h = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 3).toInt();
+				tmp_anim_header.frames = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 4).toInt();
+				tmp_anim_header.colors = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 5).toInt();
+				tmp_anim_header.byte_size = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 7).toInt();
+				tmp_anim_header.data_offset = (unsigned int)getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 8).toInt();
+				tmp_anim_header.color_offset = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 9).toInt();
+				current_frame_data_offset = _animation_start_addr + tmp_anim_header.color_offset; // + read offset value;
+				tmp_anim_header.print();
+			}
 			was_info_header = true;
-			myFile.seek(0); //GOT STARTPOS TEST!
+			line_counter = 0;
+			myFile.seek(0); //GOT STARTPOS 
 		}
+		else {
+			if (!was_info_header) {
+				continue;
+			}
+		}
+		
 
 
-		if (tmp_line.indexOf(SD_FILE_FRAME_HEADER_SEPERATOR) > 0 && tmp_line.indexOf("COLOR") > 0) {
+
+		if (tmp_line.indexOf(SD_FILE_FRAME_COLOR_SEPERATOR) > 0 && tmp_line.indexOf("COLOR") > 0) {
 			//PARSE DATA
-			//
+			//calc offset
 		}
+
 
 		//Serial.println(tmp_line);
 		//CHECK FOR LINE TYPE
-		if (tmp_line.indexOf(SD_FILE_FRAME_HEADER_SEPERATOR) > 0 && tmp_line.indexOf("FRAME") > 0 && was_info_header) {
+		if (tmp_line.indexOf(SD_FILE_FRAME_HEADER_SEPERATOR) > 0 && tmp_line.indexOf("FRAME") > 0) {
 
-			tmp_header.frame_curr = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 1).toInt();
-			tmp_header.frame_max = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 2).toInt();
-			tmp_header.frame_data_w = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 3).toInt();
-			tmp_header.frame_data_h = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 4).toInt();
-			tmp_header.frame_visibility = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 5).toInt();
-			tmp_header.frame_delay = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 6).toInt();
-			tmp_header.animation_id = animation_id_counter;
+			tmp_frame_header.frame_curr = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 1).toInt();
+			tmp_frame_header.frame_max = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 2).toInt();
+			tmp_frame_header.frame_data_w = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 3).toInt();
+			tmp_frame_header.frame_data_h = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 4).toInt();
+			tmp_frame_header.frame_visibility = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 5).toInt();
+			tmp_frame_header.frame_delay = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 6).toInt();
+			tmp_frame_header.animation_id = animation_id_counter;
 #ifdef _SER_DEBUG_
 			//	tmp_header.print_header();
 #endif
 //LOAD ONLY RIGHT SIZE ANIMATION
 #ifdef SD_LOAD_ONLY_RIGHT_SIZE_ANIMATIONS
-			if (tmp_header.frame_data_w > TOTAL_MATRIX_WIDHT) {
-				tmp_header.frame_data_w = TOTAL_MATRIX_WIDHT;
+			if (tmp_frame_header.frame_data_w > TOTAL_MATRIX_WIDHT) {
+				tmp_frame_header.frame_data_w = TOTAL_MATRIX_WIDHT;
 			}
-			if (tmp_header.frame_data_h > TOTAL_MATRIX_HEIGHT) {
-				tmp_header.frame_data_h = TOTAL_MATRIX_HEIGHT;
+			if (tmp_frame_header.frame_data_h > TOTAL_MATRIX_HEIGHT) {
+				tmp_frame_header.frame_data_h = TOTAL_MATRIX_HEIGHT;
 			}
 #endif
 			frame_started = true;
-			write_to_ram(next_frame_offset + 0, tmp_header.animation_id);
-			write_to_ram(next_frame_offset + 1, tmp_header.frame_curr);
-			write_to_ram(next_frame_offset + 2, tmp_header.frame_max);
-			write_to_ram(next_frame_offset + 3, tmp_header.frame_data_w);
-			write_to_ram(next_frame_offset + 4, tmp_header.frame_data_h);
-			write_to_ram(next_frame_offset + 5, tmp_header.frame_visibility);
-			write_to_ram(next_frame_offset + 6, tmp_header.frame_delay);
+			tmp_frame_header.write_to_ram(current_frame_data_offset);
+			current_frame_data_offset += sizeof(SD_FRAME_HEADER);
 
 			row_counter = 0;
 			continue;
 		}
 
 		else if (tmp_line.indexOf(SD_FILE_FRAME_DATA_SEPERATOR) > 0 && was_info_header) {
-			if (row_counter >= tmp_header.frame_data_h) {
+			if (row_counter >= tmp_frame_header.frame_data_h) {
 
 			}
 
-			for (size_t i = 0; i < tmp_header.frame_data_w; i++)
+			for (size_t i = 0; i < tmp_frame_header.frame_data_w; i++)
 			{
-				size_t os = ((row_counter * tmp_header.frame_data_w) + i) + next_data_offset;
+				size_t os = ((row_counter * tmp_frame_header.frame_data_w) + i) + current_frame_data_offset;
 				unsigned char read_value = (unsigned char)getValue(tmp_line, SD_FILE_FRAME_DATA_SEPERATOR, i).toInt();
-				write_to_ram(os, read_value);
+				write_byte_to_ram(os, read_value);
 #ifdef _SER_DEBUG_
 				//Serial.print("write cell at "); Serial.print(os); Serial.print(" is "); Serial.println(read_value);
 #endif
 			}
 			row_counter++;
-
+			/*
+			
+			TODOOOOO
+			FIX FRAME OFFSET ->mit loaded frames den offset berechnen
+			zuerst aber die color laden auch wieder offset mit den gleadenen farben berechnen
+			
+			
+			
+			*/
 		}
 		else
 		{
 			row_counter = 0;
 			frame_started = false;
-			next_frame_offset += sizeof(tmp_header) + (tmp_header.frame_data_w* tmp_header.frame_data_h * sizeof(byte));
-			next_data_offset = next_frame_offset + sizeof(SD_FRAME_HEADER);
+			current_frame_data_offset +=  (tmp_frame_header.frame_data_w* tmp_frame_header.frame_data_h * sizeof(byte));
+			
 			if (_next_data_start != nullptr) {
-				*_next_data_start = next_data_offset + 1;
+				*_next_data_start = current_frame_data_offset + 1;
 			}
 #ifdef _SER_DEBUG_
-			Serial.print("FRAME FINISH next frame offset is "); Serial.print(next_frame_offset); Serial.print(" NEXT DATA OFFSET IS:"); Serial.println(next_data_offset);
+			//Serial.print("FRAME FINISH next frame offset is "); Serial.print(current_frame_data_offset); Serial.print(" NEXT DATA OFFSET IS:"); Serial.println(current_frame_data_offset);
 #endif
 		}
-
+		line_counter++;
 	}
 	myFile.close();
 }
@@ -451,7 +556,7 @@ void read_frame_to_layer(unsigned int _frame_id, unsigned int _layer_id, unsigne
 	//Serial.println("----------------------------");
 	SD_FRAME_HEADER tmp;
 	unsigned int  search_offset = additional_offset;
-	tmp.read_ram(search_offset);
+	tmp.read_from_ram(search_offset);
 	//tmp.print_header();
 
 	//SEARCH FOR OFFSET
@@ -461,7 +566,7 @@ void read_frame_to_layer(unsigned int _frame_id, unsigned int _layer_id, unsigne
 			//Serial.println("FRAME  FOUND");
 			break;
 		}
-		tmp.read_ram(search_offset);
+		tmp.read_from_ram(search_offset);
 		if (tmp.frame_curr == _frame_id) {
 			//Serial.println("FRAME  FOUND 1");
 			break;
@@ -492,12 +597,12 @@ void read_frame_to_layer(unsigned int _frame_id, unsigned int _layer_id, unsigne
 		{
 			cell_offset = search_offset + sizeof(SD_FRAME_HEADER) + (j*tmp.frame_data_h) + i;
 
-			//		Serial.print(cell_offset); Serial.print("("); Serial.print(read_from_ram(cell_offset)); Serial.print(") ");
+			//		Serial.print(cell_offset); Serial.print("("); Serial.print(read_byte_from_ram(cell_offset)); Serial.print(") ");
 			if (cell_offset >= RAM_SIZE) {
 				Serial.println("FRAME NOT FOUND - SKIP FRAME");
 				return;
 			}
-			set_layer_color(_layer_id, i, j, read_from_ram(cell_offset));
+			set_layer_color(_layer_id, i, j, read_byte_from_ram(cell_offset));
 		}
 		//	Serial.println();
 	}
@@ -527,9 +632,9 @@ bool load_color_table(const char* _path, unsigned int _write_offset = 0, unsigne
 		String tmp_line = "";
 		tmp_line = myFile.readStringUntil(SD_FILE_NEW_LINE_CHAR);
 		//Serial.println(tmp_line);
-		write_to_ram(next_data_pos + 0, (unsigned char)getValue(tmp_line, SD_FILE_CSV_SEPERATION_CHAR, 0).toInt());
-		write_to_ram(next_data_pos + 1, (unsigned char)getValue(tmp_line, SD_FILE_CSV_SEPERATION_CHAR, 1).toInt());
-		write_to_ram(next_data_pos + 2, (unsigned char)getValue(tmp_line, SD_FILE_CSV_SEPERATION_CHAR, 2).toInt());
+		write_byte_to_ram(next_data_pos + 0, (unsigned char)getValue(tmp_line, SD_FILE_CSV_SEPERATION_CHAR, 0).toInt());
+		write_byte_to_ram(next_data_pos + 1, (unsigned char)getValue(tmp_line, SD_FILE_CSV_SEPERATION_CHAR, 1).toInt());
+		write_byte_to_ram(next_data_pos + 2, (unsigned char)getValue(tmp_line, SD_FILE_CSV_SEPERATION_CHAR, 2).toInt());
 		//Serial.println(next_data_pos);		
 		next_data_pos += 3;
 		lines++;
@@ -623,20 +728,15 @@ void setup()
 		return;
 	}
 
-	//LOAD COLOR TABLE
-	if (!load_color_table(SD_FILE_DEF_COLOR_TABLE, RAM_COLOR_TABLE_OFFSET, &next_free_after_color_table, &written_colors)) {
-		Serial.println("color table >COLORS.csv<  loading error");
-		return;
-	}
 
 
 	//LOAD ANIATION TO SD CARD //WRITE ANIMATION AT THE POSTION AFTER THE COLOR TABLE
-	write_sd_animation_to_sram("TEST.ANI", NULL, 0, next_free_after_color_table);
+	write_sd_animation_to_sram("TEST.PFA", NULL, 0, 0);
 
 
 
 
-	read_frame_to_layer(anim_counter, 0, next_free_after_color_table, animation_frame);
+	read_frame_to_layer(anim_counter, 0, 0, animation_frame);
 
 
 
@@ -649,7 +749,7 @@ void setup()
 }
 
 void loop() {
-
+	return;
 	unsigned long currentMillis = millis();
 
 	if ((currentMillis - previousMillis) > animation_frame->frame_delay * 3) {

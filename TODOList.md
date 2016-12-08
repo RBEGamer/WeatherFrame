@@ -5,26 +5,16 @@
 
 
 ## ARD SRC
-
-
 * animation states states in extern eeprom sichern
-
-
 * add further header for animation config ->loop ->how many loops
-
 * build layerr movement per offset
-
 * port to esp
-
 * für dem ram eine usage table adden die angibt wie viele byte unangefasst sind
 * free methode hinzufügen ??
-
 * create main file header for size info -> Colortable + animation + offsets
 * load the colortable first but this can be anywhre in the file!!!!
-
-
 * extra debug func print to serial adden ink line and func name
-
+* check for line not _ -> FRAME_ !
 
 
 
@@ -37,6 +27,7 @@
 * color table in exported reinmachen COLOR_id_R_G_B
 * import / export csv
 * ASE IMPORT
+* bitmaps nicht square sein müssen
 
 
 =======

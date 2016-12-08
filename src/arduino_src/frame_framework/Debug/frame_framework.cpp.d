@@ -1,5 +1,5 @@
-C:\Users\marcel\AppData\Local\Temp\VMicroBuilds\frame_framework\arduino_due_x_dbg\frame_framework.cpp.o: \
- C:\Users\marcel\AppData\Local\Temp\VMicroBuilds\frame_framework\arduino_due_x_dbg\frame_framework.cpp \
+C:\Users\marcel\AppData\Local\Temp\VMBuilds\frame_framework\arduino_due_x_dbg\frame_framework.cpp.o: \
+ C:\Users\marcel\AppData\Local\Temp\VMBuilds\frame_framework\arduino_due_x_dbg\frame_framework.cpp \
  C:\Users\marcel\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.9\cores\arduino/arduino.h \
  C:\Users\marcel\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.9\cores\arduino/avr/pgmspace.h \
  C:\Users\marcel\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.9\cores\arduino/avr/interrupt.h \
@@ -146,7 +146,7 @@ C:\Users\marcel\AppData\Local\Temp\VMicroBuilds\frame_framework\arduino_due_x_db
  C:\Program\ Files\ (x86)\Arduino\libraries\SD\src/utility/FatStructs.h \
  C:\Users\marcel\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.9\cores\arduino/Print.h \
  C:\Program\ Files\ (x86)\Arduino\libraries\SD\src/utility/SdFatUtil.h \
- C:\Users\marcel\AppData\Local\Temp\VMicroBuilds\frame_framework\arduino_due_x_dbg\CONFIGURATION.h \
- C:\Users\marcel\AppData\Local\Temp\VMicroBuilds\frame_framework\arduino_due_x_dbg\FRM_COLOR.cpp \
- C:\Users\marcel\AppData\Local\Temp\VMicroBuilds\frame_framework\arduino_due_x_dbg\helper_funcs.cpp \
- C:\Program\ Files\ (x86)\Microsoft\ Visual\ Studio\ 14.0\Common7\IDE\Extensions\4xlczxkk.ovw\Micro\ Platforms\default\debuggers\VM_DBG/VM_DBG.h
+ C:\Users\marcel\AppData\Local\Temp\VMBuilds\frame_framework\arduino_due_x_dbg\CONFIGURATION.h \
+ C:\Users\marcel\AppData\Local\Temp\VMBuilds\frame_framework\arduino_due_x_dbg\FRM_COLOR.cpp \
+ C:\Users\marcel\AppData\Local\Temp\VMBuilds\frame_framework\arduino_due_x_dbg\helper_funcs.cpp \
+ C:\Program\ Files\ (x86)\Microsoft\ Visual\ Studio\ 14.0\Common7\IDE\Extensions\vty5eeqx.h2q\Micro\ Platforms\default\debuggers\VM_DBG/VM_DBG.h
