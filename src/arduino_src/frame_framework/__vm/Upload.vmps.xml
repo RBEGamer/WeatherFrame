@@ -9,24 +9,24 @@
       <VCCodeMacros />
     </VCCodeModel>
     <BreakPoints>
-      <BreakPoint Index="1" Name="frame_framework.ino, Zeile 464" Id="37ea3082-93fe-4ce2-a33c-3531e3136928" Enabled="1" Message="" MessageTextType="2" PreProcessedMessage="" Condition="" ConditionType="1" CurrentHits="0" File="c:\users\marcel\desktop\weatherframe\src\arduino_src\frame_framework\frame_framework.ino" FileLine="464" FileColumn="1" FunctionName="write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_start, const byte animation_id_counter, const  unsigned int _animation_start_addr = 0)" FunctionLineOffset="48" FunctionColumnOffset="1" HitCountTarget="1" HitCountType="1" Language="C++" LocationType="3" Tag="&lt;vmbp Id='37ea3082-93fe-4ce2-a33c-3531e3136928'/&gt;" Type="1" ToString="System.__ComObject" BreakWhenHit="1">
-        <Source>457					tmp_anim_header.byte_size = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 7).toInt();
-458					tmp_anim_header.data_offset = (unsigned int)getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 8).toInt();
-459					tmp_anim_header.color_offset = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 9).toInt();
-460					current_frame_data_offset = _animation_start_addr + tmp_anim_header.color_offset; // + read offset value;
-461					Serial.println(current_frame_data_offset);
-462					tmp_anim_header.print();
-463				}
---&gt;464				was_info_header = true;
-465				line_counter = 0;
-466				myFile.seek(0); //GOT STARTPOS 
-467			}
-468			else {
-469				if (!was_info_header) {
-470					continue;
-471				}
-472			}
-473			
+      <BreakPoint Index="1" Name="frame_framework.ino, Zeile 446" Id="ffa79cf8-666e-4cb8-98f8-932127831c1a" Enabled="1" Message="" MessageTextType="2" PreProcessedMessage="" Condition="" ConditionType="1" CurrentHits="0" File="c:\users\marcel\desktop\weatherframe\src\arduino_src\frame_framework\frame_framework.ino" FileLine="446" FileColumn="1" FunctionName="" FunctionLineOffset="1" FunctionColumnOffset="1" HitCountTarget="1" HitCountType="1" Language="C++" LocationType="3" Tag="&lt;vmbp Id='ffa79cf8-666e-4cb8-98f8-932127831c1a'/&gt;" Type="1" ToString="System.__ComObject" BreakWhenHit="1">
+        <Source>439	
+440			if (  tmp_line.indexOf("ASCIIHEADV3") &gt; 0 &amp;&amp; tmp_line.indexOf(SD_FILE_INFO_HEADER_SEPARATOR) &gt; 0 &amp;&amp; !was_info_header) {
+441				
+442				String magic_word = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 0);
+443				String verson_identifier = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 1);
+444				
+445				if (magic_word != "PFA") {
+--&gt;446					return;
+447				}
+448	
+449				if (verson_identifier == "ASCIIHEADV3") {
+450					
+451					Serial.print("HEADER VERSION :");Serial.println( verson_identifier);
+452					tmp_anim_header.frame_w = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 2).toInt();
+453					tmp_anim_header.frame_h = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 3).toInt();
+454					tmp_anim_header.frames = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 4).toInt();
+455					tmp_anim_header.colors = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 5).toInt();
 </Source>
       </BreakPoint>
     </BreakPoints>

@@ -53,37 +53,40 @@ const int led_id_lookup[LED_COUNT] PROGMEM = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 #endif
 
 //DEMO RAM
-#ifndef DEMO_RAM
-#define DEMO_RAM
-#define DEMO_RAM_SIZE 65536
+#ifdef RAM_USED_RAM_TYPE_DEMO_RAM
+#define DEMO_RAM_SIZE RAM_SIZE //ON ARDUINO DUE 65765
 #define DEMO_RAM_INIT_CHAR 0
 #define DEMO_RAM_ERROR_CHAR 0
 
 unsigned char demo_ram[DEMO_RAM_SIZE];
 
 inline void write_byte_to_ram(unsigned int _addr, unsigned char _value) {
-	if (_addr > DEMO_RAM_SIZE - 1) {
+	if (_addr+ RAM_ADDITIONAL_OFFSET > DEMO_RAM_SIZE - 1) {
 #ifdef _SER_DEBUG_
 		Serial.println(F("DEMO RAM - OUT OF RANGE"));
 #endif
 	}
 	else {
-		demo_ram[_addr] = _value;
+		demo_ram[_addr+ RAM_ADDITIONAL_OFFSET] = _value;
 	}
 }
 inline unsigned char read_byte_from_ram(unsigned int _addr) {
-	if (_addr > DEMO_RAM_SIZE - 1) {
+	if (_addr+ RAM_ADDITIONAL_OFFSET > DEMO_RAM_SIZE - 1) {
 #ifdef _SER_DEBUG_
 		Serial.println(F("DEMO RAM - OUT OF RANGE"));
 #endif
 		return DEMO_RAM_ERROR_CHAR;
 	}
-	return demo_ram[_addr];
+	return demo_ram[_addr+ RAM_ADDITIONAL_OFFSET];
 }
 void init_ram() {
 	for (int i = 0; i < DEMO_RAM_SIZE; i++) {
 		demo_ram[i] = DEMO_RAM_INIT_CHAR;
 	}
+}
+
+byte* get_ptr(unsigned int _addr) {
+	return &demo_ram[_addr+ RAM_ADDITIONAL_OFFSET];
 }
 
 //template funk for all other types
@@ -178,7 +181,13 @@ struct SD_FRAME_HEADER {
 	unsigned char frame_delay;
 
 	void print_header() {
-		Serial.print(F("FRAME_HEADER FOR ANIMATION:")); Serial.print(animation_id); Serial.print(F(" CURR:")); Serial.print(frame_curr); Serial.print(F(" FROM : ")); Serial.print(frame_max); Serial.print(F(" W : ")); Serial.print(frame_data_w); Serial.print(F(" H : ")); Serial.print(frame_data_h); Serial.print(F(" DELAY : ")); Serial.print(frame_delay); Serial.print(F(" VISIBLE : ")); Serial.println(frame_visibility);
+		LOG(F("FRAME_HEADER FOR ANIMATION:"));
+		LOG(animation_id); Serial.print(F(" CURR:"));
+		LOG(frame_curr); LOG(F(" FROM : "));
+		LOG(frame_max); LOG(F(" W : ")); 
+		LOG(frame_data_w); LOG(F(" H : ")); LOG(frame_data_h);
+		LOG(F(" DELAY : ")); LOG(frame_delay); 
+		LOG(F(" VISIBLE : ")); LOGLN(frame_visibility);
 	}
 
 	void read_from_ram(const int _start_addr) {
@@ -239,7 +248,7 @@ struct ANIMATION_INFO_HEADER
 
 
 	void print() {
-		Serial.print("HEADER :ASCIIHEADV2 frame_w:" + String(frame_w) + " frame_h:" + String(frame_h) + " frames:" + String(frames) + " colors:" + String(colors) + "rgb_mode:" + String(rgb_mode) + " byte_size:" + byte_size + " data_offset:" + String(data_offset) + " color_offset:" + String(color_offset));
+		Serial.print("HEADER :ASCIIHEADV2 frame_w:" + String(frame_w) + " frame_h:" + String(frame_h) + " frames:" + String(frames) + " colors:" + String(colors) + "rgb_mode:" + String(rgb_mode) + " byte_size:" + byte_size + " data_offset:" + String(data_offset) + " color_offset:" + String(color_offset)); Serial.println("");
 
 	}
 };
@@ -422,9 +431,7 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 	}
 	SD_FRAME_HEADER tmp_frame_header;
 	ANIMATION_INFO_HEADER tmp_anim_header;
-	bool frame_started = false;
 
-	
 	int row_counter = 0;
 	bool was_info_header = false;
 
@@ -438,17 +445,18 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 		String tmp_line = "";
 		tmp_line = myFile.readStringUntil(SD_FILE_NEW_LINE_CHAR);
 		Serial.println(tmp_line);
-		//tmp_line.indexOf(SD_FILE_INFO_HEADER_SEPARATOR) > 0
-		if (  tmp_line.indexOf("ASCIIHEADV2") > 0 && tmp_line.indexOf(SD_FILE_INFO_HEADER_SEPARATOR) > 0 && !was_info_header) {
+
+		if (  tmp_line.indexOf("ASCIIHEADV3") > 0 && tmp_line.indexOf(SD_FILE_INFO_HEADER_SEPARATOR) > 0 && !was_info_header) {
 			
-			Serial.println("2131212312131133123122131112312");//PARSE THER SIZE INFOc
-			//SET OFFSET DATA
-			//CHECK SIZE
-			//WRITE A RAM FREE % PERCENTAGE
 			String magic_word = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 0);
 			String verson_identifier = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 1);
 			
-			if (verson_identifier == "ASCIIHEADV2") {
+			if (magic_word != "PFA") {
+				return;
+			}
+
+			if (verson_identifier == "ASCIIHEADV3") {
+				
 				Serial.print("HEADER VERSION :");Serial.println( verson_identifier);
 				tmp_anim_header.frame_w = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 2).toInt();
 				tmp_anim_header.frame_h = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 3).toInt();
@@ -462,23 +470,28 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 			}
 			was_info_header = true;
 			line_counter = 0;
-			myFile.seek(0); //GOT STARTPOS 
 		}
-		else {
+
+
 			if (!was_info_header) {
 				continue;
 			}
-		}
 		
+		
+	
 
-
-
-		if (tmp_line.indexOf(SD_FILE_FRAME_COLOR_SEPERATOR) > 0 && tmp_line.indexOf("COLOR") > 0) {
+	
+		if ( tmp_line.indexOf(SD_FILE_FRAME_COLOR_SEPERATOR) > 0 && tmp_line.indexOf("OLOR") > 0) {
+			int bla = 0;
 			//PARSE DATA
 			//calc offset
+			//read id * 3 + pla schauen ob über den pffset ist
+			Serial.println("COLOR FOUND");//PARSE THER SIZE INFO
+			Serial.println(tmp_line);
+			//unsigned int write_color_start = _animation_start_addr + color_storage_offset; + (cid*3)
 		}
 
-
+		continue; //DEBUG
 		//Serial.println(tmp_line);
 		//CHECK FOR LINE TYPE
 		if (tmp_line.indexOf(SD_FILE_FRAME_HEADER_SEPERATOR) > 0 && tmp_line.indexOf("FRAME") > 0) {
@@ -489,65 +502,25 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 			tmp_frame_header.frame_data_h = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 4).toInt();
 			tmp_frame_header.frame_visibility = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 5).toInt();
 			tmp_frame_header.frame_delay = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 6).toInt();
-			tmp_frame_header.animation_id = animation_id_counter;
+			tmp_frame_header.animation_id = tmp_frame_header.frame_curr;
 #ifdef _SER_DEBUG_
 			//	tmp_header.print_header();
 #endif
-//LOAD ONLY RIGHT SIZE ANIMATION
-#ifdef SD_LOAD_ONLY_RIGHT_SIZE_ANIMATIONS
+
+
 			if (tmp_frame_header.frame_data_w > TOTAL_MATRIX_WIDHT) {
 				tmp_frame_header.frame_data_w = TOTAL_MATRIX_WIDHT;
 			}
 			if (tmp_frame_header.frame_data_h > TOTAL_MATRIX_HEIGHT) {
 				tmp_frame_header.frame_data_h = TOTAL_MATRIX_HEIGHT;
 			}
-#endif
-			frame_started = true;
+	
 			tmp_frame_header.write_to_ram(current_frame_data_offset);
-			current_frame_data_offset += sizeof(SD_FRAME_HEADER);
+		//	current_frame_data_offset += sizeof(SD_FRAME_HEADER);
 
 			row_counter = 0;
-			continue;
 		}
 
-		else if (tmp_line.indexOf(SD_FILE_FRAME_DATA_SEPERATOR) > 0 && was_info_header) {
-			if (row_counter >= tmp_frame_header.frame_data_h) {
-
-			}
-
-			for (size_t i = 0; i < tmp_frame_header.frame_data_w; i++)
-			{
-				size_t os = ((row_counter * tmp_frame_header.frame_data_w) + i) + current_frame_data_offset;
-				unsigned char read_value = (unsigned char)getValue(tmp_line, SD_FILE_FRAME_DATA_SEPERATOR, i).toInt();
-				write_byte_to_ram(os, read_value);
-#ifdef _SER_DEBUG_
-				//Serial.print("write cell at "); Serial.print(os); Serial.print(" is "); Serial.println(read_value);
-#endif
-			}
-			row_counter++;
-			/*
-			
-			TODOOOOO
-			FIX FRAME OFFSET ->mit loaded frames den offset berechnen
-			zuerst aber die color laden auch wieder offset mit den gleadenen farben berechnen
-			
-			
-			
-			*/
-		}
-		else
-		{
-			row_counter = 0;
-			frame_started = false;
-			current_frame_data_offset +=  (tmp_frame_header.frame_data_w* tmp_frame_header.frame_data_h * sizeof(byte));
-			
-			if (_next_data_start != nullptr) {
-				*_next_data_start = current_frame_data_offset + 1;
-			}
-#ifdef _SER_DEBUG_
-			//Serial.print("FRAME FINISH next frame offset is "); Serial.print(current_frame_data_offset); Serial.print(" NEXT DATA OFFSET IS:"); Serial.println(current_frame_data_offset);
-#endif
-		}
 		line_counter++;
 	}
 	myFile.close();
@@ -752,7 +725,7 @@ void loop() {
 	return;
 	unsigned long currentMillis = millis();
 
-	if ((currentMillis - previousMillis) > animation_frame->frame_delay * 3) {
+	if ((currentMillis - previousMillis) > animation_frame->frame_delay ) {
 
 		previousMillis = currentMillis;
 		Serial.println(animation_frame->frame_delay);
@@ -766,6 +739,7 @@ void loop() {
 		show_output_layer();
 	}
 	//	delay(500);
+
 
 
 }

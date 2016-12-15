@@ -17,14 +17,13 @@
 * check for line not _ -> FRAME_ !
 
 
-
+* FAME INFO MACHEN und dann einen FRAME DATA BLOCK mit FRAMEDATA_<id>_data0, dara1
 ## FRAME_BUILDER GUI
 
 <<<<<<< HEAD
 * add playback mode
 * das move ment einfach per offset rechnen machen aber die animation trotzdem komplett laden
 * in den header einen offset einrechnen
-* color table in exported reinmachen COLOR_id_R_G_B
 * import / export csv
 * ASE IMPORT
 * bitmaps nicht square sein müssen
