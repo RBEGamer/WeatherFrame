@@ -446,16 +446,18 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 		tmp_line = myFile.readStringUntil(SD_FILE_NEW_LINE_CHAR);
 		Serial.println(tmp_line);
 
-		if (  tmp_line.indexOf("ASCIIHEADV3") > 0 && tmp_line.indexOf(SD_FILE_INFO_HEADER_SEPARATOR) > 0 && !was_info_header) {
+		if (  tmp_line.indexOf(PFA_SUPPORTED_HEADER_INDENTIFIER_V3) > 0 && tmp_line.indexOf(SD_FILE_INFO_HEADER_SEPARATOR) > 0 && !was_info_header) {
 			
 			String magic_word = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 0);
 			String verson_identifier = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 1);
 			
-			if (magic_word != "PFA") {
+			if (magic_word != PFA_HEADER_MAGIC_WORD) {
+				LOG("THE MAGIC WORD IN THE FILE MISMATCH :");
+				LOGLN(PFA_HEADER_MAGIC_WORD);
 				return;
 			}
 
-			if (verson_identifier == "ASCIIHEADV3") {
+			if (verson_identifier == PFA_SUPPORTED_HEADER_INDENTIFIER_V3) {
 				
 				Serial.print("HEADER VERSION :");Serial.println( verson_identifier);
 				tmp_anim_header.frame_w = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 2).toInt();
@@ -469,7 +471,9 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 				tmp_anim_header.print();
 			}
 			was_info_header = true;
+			//RESET COUNTERS AND SET FILEPOS TO START
 			line_counter = 0;
+			myFile.seek(0);
 		}
 
 
@@ -518,7 +522,7 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 			tmp_frame_header.write_to_ram(current_frame_data_offset);
 		//	current_frame_data_offset += sizeof(SD_FRAME_HEADER);
 
-			row_counter = 0;
+			
 		}
 
 		line_counter++;
