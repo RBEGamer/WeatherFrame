@@ -65,18 +65,20 @@
 
 //HELPER DEFINES
 #ifdef DEBUG
-#define _SER_DEBUG_
+#define PRINT_DEBUG
 #define ENABLE_FRAMERATE_OUTPUT
 #endif // DEBUG
 
-//LOG DEFINES
+//LOG DEBUG DEFINES
 #define SERIAL_LOG_PORT Serial //eg Serial Serial1 Serial2 on Arduino due 
 #define LOG(x) SERIAL_LOG_PORT.print(x)
 #define LOGLN(x) SERIAL_LOG_PORT.println(x)
-
+//LOG ERROR DEFINES
+#define LOGERR(x) SERIAL_LOG_PORT.print(x)
+#define LOGLNERR(x) SERIAL_LOG_PORT.println(x)
 
 //if _SER_DEBUG_ not defined disable the log funcs
-#ifndef _SER_DEBUG_
+#ifndef PRINT_DEBUG
 #define LOG(x) ((void)0)
 #define LOGLN(x) ((void)0)
 #endif
@@ -86,15 +88,18 @@
 #define LOGLN(x) ((void)0)
 #endif
 
-
 //IF YOUR ARE USING AN ESP WE CANT USE F()
 #ifdef DISABLE_FLASH_STRINGS
 #define F(param) param
 #endif
 
 
+
+
 //IS OPEN WITH VISUAL STUDIO ? WE DONT NEED THIS
 #ifndef _MSC_VER
-#define byte unsigned char;
-#define nullptr NULL
+//#define byte unsigned char;
+//#define nullptr NULL
 #endif
+
+#define RAM_COLOR_TABLE_OFFSET 0 //TO BE DELTED

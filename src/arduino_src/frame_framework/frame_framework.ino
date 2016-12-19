@@ -120,15 +120,11 @@ byte* get_ptr(unsigned int _addr) {
 
 //func deklare
 void show_output_layer();
-
+void clear_output_layer();
 //_--------------------VARS
 
 
-void print_color(FRM_COLOR _col) {
-	Serial.print("COLOR R:"); Serial.print(_col.r);
-	Serial.print(" G:"); Serial.print(_col.g);
-	Serial.print(" B:"); Serial.println(_col.b);
-}
+
 
 
 
@@ -438,6 +434,7 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 	unsigned int color_storage_offset = 0;
 	unsigned int data_storage_offset = 0;
 	unsigned int current_frame_data_offset = 0;
+	unsigned int current_color_data_offset = 0;
 
 	while (myFile.available()) {
 		int line_counter = 0;
@@ -465,15 +462,18 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 				tmp_anim_header.frames = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 4).toInt();
 				tmp_anim_header.colors = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 5).toInt();
 				tmp_anim_header.byte_size = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 7).toInt();
+				//GET THE SIZE OF THE DATA BLOCKS (FRAMES AND COLOR)
 				tmp_anim_header.data_offset = (unsigned int)getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 8).toInt();
 				tmp_anim_header.color_offset = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 9).toInt();
+				//CALC THE STORAGE OFFSET ONE FOR THE FRAMES AND ONE FOR THE COLORS (THIS ARE THE START WRITE VALUES)
 				current_frame_data_offset = _animation_start_addr + tmp_anim_header.color_offset; // + read offset value;
+				current_color_data_offset = _animation_start_addr + 0;
 				tmp_anim_header.print();
 			}
 			was_info_header = true;
 			//RESET COUNTERS AND SET FILEPOS TO START
 			line_counter = 0;
-			myFile.seek(0);
+			myFile.seek(0); //RESET FILE POS -> it can be that the file header is on the end of the file
 		}
 
 
@@ -485,14 +485,21 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 	
 
 	
-		if ( tmp_line.indexOf(SD_FILE_FRAME_COLOR_SEPERATOR) > 0 && tmp_line.indexOf("OLOR") > 0) {
+		if ( tmp_line.indexOf(SD_FILE_FRAME_COLOR_SEPERATOR) > 0 && tmp_line.indexOf("COLOR") > 0) {
 			int bla = 0;
 			//PARSE DATA
+			COLOR_DESC col;
+			
 			//calc offset
-			//read id * 3 + pla schauen ob über den pffset ist
-			Serial.println("COLOR FOUND");//PARSE THER SIZE INFO
-			Serial.println(tmp_line);
-			//unsigned int write_color_start = _animation_start_addr + color_storage_offset; + (cid*3)
+			col.id = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 1).toInt();
+			col.r = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 2).toInt();
+			col.g = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 3).toInt();
+			col.b = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 4).toInt();
+			col.print();
+			//MOVE TO COLOR CLASS !!!! TODO
+			write_byte_to_ram(current_color_data_offset + 0 + (col.id * 3) + 0, col.r);
+			write_byte_to_ram(current_color_data_offset + 0 + (col.id * 3) + 1, col.g);
+			write_byte_to_ram(current_color_data_offset + 0 + (col.id * 3) + 2, col.b);
 		}
 
 		continue; //DEBUG
@@ -529,6 +536,8 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 	}
 	myFile.close();
 }
+
+
 void read_frame_to_layer(unsigned int _frame_id, unsigned int _layer_id, unsigned int additional_offset = 0, SD_FRAME_HEADER* _head = nullptr) {
 	//Serial.println("----------------------------");
 	SD_FRAME_HEADER tmp;
@@ -629,10 +638,7 @@ bool load_color_table(const char* _path, unsigned int _write_offset = 0, unsigne
 }
 
 
-struct CONFIG_HEADER
-{
 
-};
 
 bool load_config_file(const char* _path) {
 
@@ -657,9 +663,7 @@ void setup()
 	animation_frame->frame_delay = 100;
 
 	Serial.begin(SERIAL_BAUD_RATE);
-#ifdef _SER_DEBUG_
-	Serial.println(F("INIT LED MATRIX"));
-#endif
+	LOGLN(F("INIT LED MATRIX"));
 	led_matrix.begin();
 
 
@@ -667,17 +671,13 @@ void setup()
 	pinMode(FRAMERATE_OUTPUT_PIN, OUTPUT);
 	framerate_output_state = false;
 	digitalWrite(FRAMERATE_OUTPUT_PIN, framerate_output_state);
-#ifdef _SER_DEBUG_
-	Serial.print(F("ENABLE FRAMERATE OUTPUT AT PIN")); Serial.println(FRAMERATE_OUTPUT_PIN);
-#endif
+	LOG(F("ENABLE FRAMERATE OUTPUT AT PIN")); LOGLN(FRAMERATE_OUTPUT_PIN);
 #endif
 
 
 
 
-#ifdef _SER_DEBUG_
-	Serial.println(F("INIT LAYERS"));
-#endif
+	LOGLN(F("INIT LAYERS"));
 	clear_all_layers();
 	clear_output_layer();
 	//INIT LAYER INTENSES
@@ -689,19 +689,13 @@ void setup()
 
 
 
-#ifdef _SER_DEBUG_
-	Serial.println(F("INIT RAM"));
-#endif
+	LOGLN(F("INIT RAM"));
 	init_ram();
 
 
-#ifdef _SER_DEBUG_
-	Serial.println(F("INIT SD CARD"));
-#endif
-
-
+	LOGLN(F("INIT SD CARD"));
 	if (!SD.begin(SD_CARD_CS_PIN)) {
-		Serial.println("SD INI FAILED");
+	LOGLNERR(F("SD INIT FAILED"));
 		return;
 	}
 
