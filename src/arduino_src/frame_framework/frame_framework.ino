@@ -463,8 +463,8 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 				tmp_anim_header.data_offset = (unsigned int)getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 8).toInt();
 				tmp_anim_header.color_offset = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 9).toInt();
 				//CALC THE STORAGE OFFSET ONE FOR THE FRAMES AND ONE FOR THE COLORS (THIS ARE THE START WRITE VALUES)
-				current_frame_data_offset = _animation_start_addr + tmp_anim_header.color_offset; // + read offset value;
-				current_color_data_offset = _animation_start_addr + 0;
+				current_frame_data_offset = _animation_start_addr + tmp_anim_header.color_offset + sizeof(ANIMATION_INFO_HEADER); // + read offset value;
+				current_color_data_offset = _animation_start_addr + sizeof(ANIMATION_INFO_HEADER) + 0;
 				//CALC THE POS FOR THE NEXT ANIMATION START
 				*_next_data_start = _animation_start_addr + tmp_anim_header.color_offset + tmp_anim_header.data_offset;
 				tmp_anim_header.print();
