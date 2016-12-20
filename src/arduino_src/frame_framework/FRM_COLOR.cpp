@@ -46,7 +46,7 @@ class FRM_COLOR
 	}
 
 	void print() {
-		LOG(F("COLOR ")); LOG(id); LOG(F(" -> R:")); LOG(r); LOG(F(" G:")); LOG(g); LOG(F(" B:")); LOGLN(b);
+//		LOG("COLOR "); LOG(id); LOG(" -> R:"); LOG(r); LOG(" G:"); LOG(g); LOG(" B:"); LOGLN(b);
 	}
 
     bool equals(FRM_COLOR _e) {
