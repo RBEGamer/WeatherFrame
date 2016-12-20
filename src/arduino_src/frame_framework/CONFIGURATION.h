@@ -1,11 +1,12 @@
 #define PLATTFORM_ESP
 
-//PINS
-//ARDUINO PINS
+#define VERSION_BUILD 0
+
+
+//PIN CONFIG
 #define WS2812_PIN 5
 #define SD_CARD_CS_PIN 4
 #define FRAMERATE_OUTPUT_PIN 13 //IF ENABLE_FRAMERATE_OUTPUT defined to check the framerate via oszi
-
 
 //DEFINE YOUR MATRIX SIZE HERE
 #define VISIBLE_MATRIX_WITH 8 //WIDTH
@@ -26,7 +27,7 @@
 #define RAM_FRAME_TABLE_OFFSET (VISIBLE_MATRIX_WITH*VISIBLE_MATRIX_HEIGHT*RAM_BYTE_SIZE)+RAM_ADDITIONAL_OFFSET
 
 //HELPER DEFINES
-#define _SER_DEBUG_ //ENABE SERIAL DEBUGGIN
+#define PRINT_DEBUG //ENABE SERIAL DEBUGGIN
 
 
 
@@ -40,6 +41,7 @@
 
 
 #define SERIAL_BAUD_RATE 115200 //define serial baud rate
+#define SERIAL_LOG_PORT Serial //eg Serial Serial1 Serial2 on Arduino due / MEGA
 #define DISABLE_FLASH_STRINGS //ARE THIS SKETCH IS RUNNING ON A EPS ? F()...
 //#define DISABLE_SER_PORT //uncomment if you want to diable serial output logging 
 
@@ -52,9 +54,10 @@
 #define SD_FILE_CSV_SEPERATION_CHAR ','
 #define SD_FILE_INFO_HEADER_SEPARATOR '_'
 
+//SUPPORTED FILE FORMAT INFO
 #define PFA_SUPPORTED_HEADER_INDENTIFIER_V3 "ASCIIHEADV3"
-#define PFA_HEADER_MAGIC_WORD "PFA"
-
+#define PFA_HEADER_MAGIC_WORD "PFA" //FIX !
+#define PFA_COMBINED_HEADER_IDENT PFA_HEADER_MAGIC_WORD SD_FILE_INFO_HEADER_SEPARATOR PFA_SUPPORTED_HEADER_INDENTIFIER_V3 //SOME WIRED COMBINING :D IF YOU SEE THI FIRST
 
 
 
@@ -64,20 +67,26 @@
 
 
 //HELPER DEFINES
-#ifdef DEBUG
+#ifdef _DEBUG
 #define PRINT_DEBUG
 #define ENABLE_FRAMERATE_OUTPUT
 #endif // DEBUG
 
+#ifdef _RELEASE
+#endif
+
 //LOG DEBUG DEFINES
-#define SERIAL_LOG_PORT Serial //eg Serial Serial1 Serial2 on Arduino due 
 #define LOG(x) SERIAL_LOG_PORT.print(x)
 #define LOGLN(x) SERIAL_LOG_PORT.println(x)
 //LOG ERROR DEFINES
 #define LOGERR(x) SERIAL_LOG_PORT.print(x)
 #define LOGLNERR(x) SERIAL_LOG_PORT.println(x)
+//STRING DEBUG LOGGIN
+#define LOGS(x) LOG(F(x))
+#define LOGLNS(x) LOGLN(F(x))
 
-//if _SER_DEBUG_ not defined disable the log funcs
+
+//if PRINT_DEBUG not defined disable the log funcs
 #ifndef PRINT_DEBUG
 #define LOG(x) ((void)0)
 #define LOGLN(x) ((void)0)

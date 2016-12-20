@@ -61,23 +61,23 @@ const int led_id_lookup[LED_COUNT] PROGMEM = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 unsigned char demo_ram[DEMO_RAM_SIZE];
 
 inline void write_byte_to_ram(unsigned int _addr, unsigned char _value) {
-	if (_addr+ RAM_ADDITIONAL_OFFSET > DEMO_RAM_SIZE - 1) {
+	if (_addr + RAM_ADDITIONAL_OFFSET > DEMO_RAM_SIZE - 1) {
 #ifdef _SER_DEBUG_
 		Serial.println(F("DEMO RAM - OUT OF RANGE"));
 #endif
 	}
 	else {
-		demo_ram[_addr+ RAM_ADDITIONAL_OFFSET] = _value;
+		demo_ram[_addr + RAM_ADDITIONAL_OFFSET] = _value;
 	}
 }
 inline unsigned char read_byte_from_ram(unsigned int _addr) {
-	if (_addr+ RAM_ADDITIONAL_OFFSET > DEMO_RAM_SIZE - 1) {
+	if (_addr + RAM_ADDITIONAL_OFFSET > DEMO_RAM_SIZE - 1) {
 #ifdef _SER_DEBUG_
 		Serial.println(F("DEMO RAM - OUT OF RANGE"));
 #endif
 		return DEMO_RAM_ERROR_CHAR;
 	}
-	return demo_ram[_addr+ RAM_ADDITIONAL_OFFSET];
+	return demo_ram[_addr + RAM_ADDITIONAL_OFFSET];
 }
 void init_ram() {
 	for (int i = 0; i < DEMO_RAM_SIZE; i++) {
@@ -86,7 +86,7 @@ void init_ram() {
 }
 
 byte* get_ptr(unsigned int _addr) {
-	return &demo_ram[_addr+ RAM_ADDITIONAL_OFFSET];
+	return &demo_ram[_addr + RAM_ADDITIONAL_OFFSET];
 }
 
 //template funk for all other types
@@ -144,6 +144,12 @@ String getValue(String data, char separator, int index)
 	return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
+int countChars(const char* s,const char c)
+{
+	return *s == '\0'
+		? 0
+		: countChars(s + 1, c) + (*s == c);
+}
 
 float layer_intense[COUNT_OF_LAYERS];
 #ifdef ENABLE_OUTPUT_INTENSE
@@ -180,9 +186,9 @@ struct SD_FRAME_HEADER {
 		LOG(F("FRAME_HEADER FOR ANIMATION:"));
 		LOG(animation_id); Serial.print(F(" CURR:"));
 		LOG(frame_curr); LOG(F(" FROM : "));
-		LOG(frame_max); LOG(F(" W : ")); 
+		LOG(frame_max); LOG(F(" W : "));
 		LOG(frame_data_w); LOG(F(" H : ")); LOG(frame_data_h);
-		LOG(F(" DELAY : ")); LOG(frame_delay); 
+		LOG(F(" DELAY : ")); LOG(frame_delay);
 		LOG(F(" VISIBLE : ")); LOGLN(frame_visibility);
 	}
 
@@ -201,7 +207,7 @@ struct SD_FRAME_HEADER {
 		write_byte_to_ram(_start_addr + sizeof(animation_id), frame_curr);
 		write_byte_to_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr), frame_max);
 		write_byte_to_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr) + sizeof(frame_max), frame_data_w);
-		write_byte_to_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr) + sizeof(frame_max) +  sizeof(frame_data_w), frame_data_h);
+		write_byte_to_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr) + sizeof(frame_max) + sizeof(frame_data_w), frame_data_h);
 		write_byte_to_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr) + sizeof(frame_max) + sizeof(frame_data_w) + sizeof(frame_data_h), frame_visibility);
 		write_byte_to_ram(_start_addr + sizeof(animation_id) + sizeof(frame_curr) + sizeof(frame_max) + sizeof(frame_data_w) + sizeof(frame_data_h) + sizeof(frame_visibility), frame_delay);
 	}
@@ -219,12 +225,12 @@ struct ANIMATION_INFO_HEADER
 	unsigned int color_offset;
 
 
-	void write_to_ram(const unsigned int _start_addr ) {
+	void write_to_ram(const unsigned int _start_addr) {
 		write_byte_to_ram(_start_addr + 0, frame_w);
 		write_byte_to_ram(_start_addr + sizeof(frame_w), frame_h);
 		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h), frames);
-		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames),colors);
-		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors),rgb_mode);
+		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames), colors);
+		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors), rgb_mode);
 		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode), byte_size);
 		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size), data_offset);
 		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size) + sizeof(data_offset), color_offset);
@@ -239,13 +245,12 @@ struct ANIMATION_INFO_HEADER
 		rgb_mode = read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors));
 		byte_size = read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode));
 		data_offset = read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size));
-		color_offset= read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size) + sizeof(data_offset));
+		color_offset = read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size) + sizeof(data_offset));
 	}
 
 
 	void print() {
-		Serial.print("HEADER :ASCIIHEADV2 frame_w:" + String(frame_w) + " frame_h:" + String(frame_h) + " frames:" + String(frames) + " colors:" + String(colors) + "rgb_mode:" + String(rgb_mode) + " byte_size:" + byte_size + " data_offset:" + String(data_offset) + " color_offset:" + String(color_offset)); Serial.println("");
-
+		LOG(F("HEADER :PFA_ASCIIHEADV3 frame_w:") + String(frame_w) + F(" frame_h:") + String(frame_h) + F(" frames:") + String(frames) + F(" colors:") + String(colors) + F(" rgb_mode:") + String(rgb_mode) + F(" byte_size:") + byte_size + F(" data_offset:") + String(data_offset) + F(" color_offset:") + String(color_offset)); LOGLN("");
 	}
 };
 
@@ -408,9 +413,9 @@ void layer_write_to_serial(unsigned int _layer_id) {
 	{
 		for (size_t j = 0; j < TOTAL_MATRIX_HEIGHT; j++)
 		{
-			Serial.print(layers[_layer_id][i][j]); Serial.print(" ");
+			LOG(layers[_layer_id][i][j]); LOG(F(" "));
 		}
-		Serial.println("");
+		LOGLN(F(""));
 	}
 }
 
@@ -420,43 +425,35 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 	//FIRST OPEN FILE TO CHECK EXISTS
 	File myFile;
 	myFile = SD.open(_path);
-
 	if (!myFile) {
-		Serial.println(F("FILE CANNOT BE OPEN"));
+		LOGLNERR(F("FILE CANNOT BE OPEN"));
 		return;
 	}
-	SD_FRAME_HEADER tmp_frame_header;
-	ANIMATION_INFO_HEADER tmp_anim_header;
-
-	int row_counter = 0;
-	bool was_info_header = false;
-
-	unsigned int color_storage_offset = 0;
-	unsigned int data_storage_offset = 0;
-	unsigned int current_frame_data_offset = 0;
-	unsigned int current_color_data_offset = 0;
-
+	//SOME NEEDED VARS
+	size_t was_info_header = false;
+	size_t data_storage_offset = 0;
+	size_t current_frame_data_offset = 0;
+	size_t current_color_data_offset = 0;
+	//GET FILE CONTENT
 	while (myFile.available()) {
-		int line_counter = 0;
 		//GET CURRENT LINE
 		String tmp_line = "";
 		tmp_line = myFile.readStringUntil(SD_FILE_NEW_LINE_CHAR);
-		Serial.println(tmp_line);
+	//	LOGLN(tmp_line);
 
-		if (  tmp_line.indexOf(PFA_SUPPORTED_HEADER_INDENTIFIER_V3) > 0 && tmp_line.indexOf(SD_FILE_INFO_HEADER_SEPARATOR) > 0 && !was_info_header) {
-			
+		//PARSE FILE HEADER
+		if (tmp_line.substring(0, strlen(PFA_COMBINED_HEADER_IDENT)) == PFA_COMBINED_HEADER_IDENT && tmp_line.indexOf(SD_FILE_INFO_HEADER_SEPARATOR) > 0 && !was_info_header) {
 			String magic_word = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 0);
 			String verson_identifier = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 1);
-			
+			//CHECK MAGIC WORD
 			if (magic_word != PFA_HEADER_MAGIC_WORD) {
 				LOG("THE MAGIC WORD IN THE FILE MISMATCH :");
 				LOGLN(PFA_HEADER_MAGIC_WORD);
 				return;
 			}
-
+			//PARSE HEADER
 			if (verson_identifier == PFA_SUPPORTED_HEADER_INDENTIFIER_V3) {
-				
-				Serial.print("HEADER VERSION :");Serial.println( verson_identifier);
+				ANIMATION_INFO_HEADER tmp_anim_header;
 				tmp_anim_header.frame_w = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 2).toInt();
 				tmp_anim_header.frame_h = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 3).toInt();
 				tmp_anim_header.frames = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 4).toInt();
@@ -468,45 +465,39 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 				//CALC THE STORAGE OFFSET ONE FOR THE FRAMES AND ONE FOR THE COLORS (THIS ARE THE START WRITE VALUES)
 				current_frame_data_offset = _animation_start_addr + tmp_anim_header.color_offset; // + read offset value;
 				current_color_data_offset = _animation_start_addr + 0;
+				//CALC THE POS FOR THE NEXT ANIMATION START
+				*_next_data_start = _animation_start_addr + tmp_anim_header.color_offset + tmp_anim_header.data_offset;
 				tmp_anim_header.print();
 			}
-			was_info_header = true;
 			//RESET COUNTERS AND SET FILEPOS TO START
-			line_counter = 0;
+			was_info_header = true;
 			myFile.seek(0); //RESET FILE POS -> it can be that the file header is on the end of the file
 		}
 
-
-			if (!was_info_header) {
-				continue;
-			}
-		
-		
-	
-
-	
-		if ( tmp_line.indexOf(SD_FILE_FRAME_COLOR_SEPERATOR) > 0 && tmp_line.indexOf("COLOR") > 0) {
+		//IF THE HEASER WASNT FOUND 
+		if (!was_info_header) {
+			continue;
+		}
+		//COLOR PARSING
+		if (tmp_line.indexOf(SD_FILE_FRAME_COLOR_SEPERATOR) > 0 && tmp_line.substring(0, strlen("COLOR")) == "COLOR") {
 			int bla = 0;
 			//PARSE DATA
 			COLOR_DESC col;
-			
-			//calc offset
-			col.id = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 1).toInt();
-			col.r = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 2).toInt();
-			col.g = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 3).toInt();
-			col.b = getValue(tmp_line, SD_FILE_INFO_HEADER_SEPARATOR, 4).toInt();
-			col.print();
+			col.id = getValue(tmp_line, SD_FILE_FRAME_COLOR_SEPERATOR, 1).toInt();
+			col.r = getValue(tmp_line, SD_FILE_FRAME_COLOR_SEPERATOR, 2).toInt();
+			col.g = getValue(tmp_line, SD_FILE_FRAME_COLOR_SEPERATOR, 3).toInt();
+			col.b = getValue(tmp_line, SD_FILE_FRAME_COLOR_SEPERATOR, 4).toInt();
+			//col.print();
 			//MOVE TO COLOR CLASS !!!! TODO
 			write_byte_to_ram(current_color_data_offset + 0 + (col.id * 3) + 0, col.r);
 			write_byte_to_ram(current_color_data_offset + 0 + (col.id * 3) + 1, col.g);
 			write_byte_to_ram(current_color_data_offset + 0 + (col.id * 3) + 2, col.b);
 		}
-
-		continue; //DEBUG
-		//Serial.println(tmp_line);
 		//CHECK FOR LINE TYPE
-		if (tmp_line.indexOf(SD_FILE_FRAME_HEADER_SEPERATOR) > 0 && tmp_line.indexOf("FRAME") > 0) {
-
+		if (tmp_line.indexOf(SD_FILE_FRAME_HEADER_SEPERATOR) > 0 && tmp_line.substring(0, strlen("FRAME")) == "FRAME") {
+			LOG(F("FRAME"));
+			//PARSE FRAME HEADER
+			SD_FRAME_HEADER tmp_frame_header;
 			tmp_frame_header.frame_curr = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 1).toInt();
 			tmp_frame_header.frame_max = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 2).toInt();
 			tmp_frame_header.frame_data_w = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 3).toInt();
@@ -514,25 +505,63 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 			tmp_frame_header.frame_visibility = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 5).toInt();
 			tmp_frame_header.frame_delay = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 6).toInt();
 			tmp_frame_header.animation_id = tmp_frame_header.frame_curr;
-#ifdef _SER_DEBUG_
-			//	tmp_header.print_header();
-#endif
 
-
+			//READ THE FRAME DATA TO A STRING
+			String frame_data_string = getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, 7);
+			LOGLN(frame_data_string);
+			size_t data_set_count = countChars(frame_data_string.c_str(), SD_FILE_CSV_SEPERATION_CHAR);
+			size_t data_count = (tmp_frame_header.frame_data_w*tmp_frame_header.frame_data_h);
+			//CHECK IF DATA AVARIABLE
+			if (data_set_count <= 0) {
+				LOGLNERR("NO SPERATION CHAR FOUND INT FRAME DATA");
+				return;
+			}
+			//CHECK IF THE DATA MATCHES THE HEADER INFO
+			if (data_count != data_set_count) {
+				LOGERR("THE GIVEN FRAME DIMENSON DOES NOT MATCH THE DATA SET ");
+				LOGERR(data_count);
+				LOGERR("!=");
+				LOGLNERR(data_set_count);
+				return;
+			}
+			//NOW SPLIT DATA BY READED FRAME SIZE
+			size_t matrix_w_counter = 0;
+			size_t matrx_h_counter = 0;
+			size_t matrix_ram_cell = 0;
+			for (size_t i = 0; i < data_count; i++)
+			{
+				if (matrix_w_counter < TOTAL_MATRIX_WIDHT - 1) {
+					unsigned char cell = (unsigned char)getValue(tmp_line, SD_FILE_FRAME_HEADER_SEPERATOR, i).toInt();
+					write_byte_to_ram(current_frame_data_offset +sizeof(tmp_frame_header)  + matrix_ram_cell, cell); //TODO CHECK THIS
+					matrix_w_counter++;
+					matrix_ram_cell++;
+				}
+				else {
+					matrix_w_counter = 0;
+					int next_line_start = tmp_frame_header.frame_data_w - TOTAL_MATRIX_WIDHT;
+					if (next_line_start > 0) {
+						i += next_line_start;
+					}
+					matrx_h_counter++;
+				}
+				//INCREASE OFFSET FOR NEXT FRAME
+				current_color_data_offset += matrix_ram_cell+ sizeof(tmp_frame_header); //TODO CHECK THIS
+				//BREAK IF MATRIX HEIGHT IS REACHED
+				if (matrx_h_counter >= TOTAL_MATRIX_HEIGHT) {
+					break;
+				}
+			}
+			//CHECK FRAME SIZES AND CORRECT THEM IF NEEDED THIS MUST AFTER LOADING TO DO IT RIGHT
 			if (tmp_frame_header.frame_data_w > TOTAL_MATRIX_WIDHT) {
 				tmp_frame_header.frame_data_w = TOTAL_MATRIX_WIDHT;
 			}
 			if (tmp_frame_header.frame_data_h > TOTAL_MATRIX_HEIGHT) {
 				tmp_frame_header.frame_data_h = TOTAL_MATRIX_HEIGHT;
 			}
-	
-			tmp_frame_header.write_to_ram(current_frame_data_offset);
-		//	current_frame_data_offset += sizeof(SD_FRAME_HEADER);
-
-			
+			//WRITE HEADER
+			tmp_frame_header.print_header();
+			tmp_frame_header.write_to_ram(_animation_start_addr + current_frame_data_offset);
 		}
-
-		line_counter++;
 	}
 	myFile.close();
 }
@@ -559,7 +588,7 @@ void read_frame_to_layer(unsigned int _frame_id, unsigned int _layer_id, unsigne
 		}
 		//break at end of animation
 		if (search_offset >= RAM_SIZE || search_offset >= ((tmp.frame_data_h* tmp.frame_data_w * sizeof(byte) * tmp.frame_max + 1) + (sizeof(SD_FRAME_HEADER)* tmp.frame_max)) + additional_offset) {
-			Serial.println("FRAME NOT FOUND SKIP FRAME");
+			LOGLNERR(F("FRAME NOT FOUND SKIP FRAME"));
 			return;
 		}
 		search_offset += sizeof(SD_FRAME_HEADER) + (tmp.frame_data_w*tmp.frame_data_h * sizeof(byte));
@@ -573,7 +602,7 @@ void read_frame_to_layer(unsigned int _frame_id, unsigned int _layer_id, unsigne
 		layer_intense[_layer_id] = (1.0f / (float)tmp.frame_visibility);
 	}
 	else {
-		Serial.println(F("READ FRAME TO LAYER - DIV 0"));
+		LOGLNERR(F("READ FRAME TO LAYER - DIV 0"));
 		layer_intense[_layer_id] = 1.0f;
 	}
 	int cell_offset = 0;
@@ -585,7 +614,7 @@ void read_frame_to_layer(unsigned int _frame_id, unsigned int _layer_id, unsigne
 
 			//		Serial.print(cell_offset); Serial.print("("); Serial.print(read_byte_from_ram(cell_offset)); Serial.print(") ");
 			if (cell_offset >= RAM_SIZE) {
-				Serial.println("FRAME NOT FOUND - SKIP FRAME");
+				LOGLNERR("FRAME NOT FOUND - SKIP FRAME");
 				return;
 			}
 			set_layer_color(_layer_id, i, j, read_byte_from_ram(cell_offset));
@@ -601,41 +630,6 @@ void read_frame_to_layer(unsigned int _frame_id, unsigned int _layer_id, unsigne
 unsigned int written_colors = 0;
 unsigned int next_free_after_color_table = 0;
 
-bool load_color_table(const char* _path, unsigned int _write_offset = 0, unsigned int* _next_data_start = nullptr, unsigned int* _loaded_colors = nullptr) {
-	File myFile;
-	myFile = SD.open(_path);
-	if (!myFile) {
-		Serial.println(F("FILE CANNOT BE OPEN"));
-		return false;
-	}
-	unsigned int next_data_pos = _write_offset;
-	unsigned int lines = 0;
-	if (_loaded_colors != nullptr) {
-		*_loaded_colors = 0;
-	}
-	FRM_COLOR tmp_col;
-	while (myFile.available()) {
-		String tmp_line = "";
-		tmp_line = myFile.readStringUntil(SD_FILE_NEW_LINE_CHAR);
-		//Serial.println(tmp_line);
-		write_byte_to_ram(next_data_pos + 0, (unsigned char)getValue(tmp_line, SD_FILE_CSV_SEPERATION_CHAR, 0).toInt());
-		write_byte_to_ram(next_data_pos + 1, (unsigned char)getValue(tmp_line, SD_FILE_CSV_SEPERATION_CHAR, 1).toInt());
-		write_byte_to_ram(next_data_pos + 2, (unsigned char)getValue(tmp_line, SD_FILE_CSV_SEPERATION_CHAR, 2).toInt());
-		//Serial.println(next_data_pos);		
-		next_data_pos += 3;
-		lines++;
-	}
-
-
-	if (_next_data_start != nullptr) {
-		*_next_data_start = next_data_pos;
-	}
-	if (_loaded_colors != nullptr) {
-		*_loaded_colors = lines;
-	}
-	myFile.close();
-	return true;
-}
 
 
 
@@ -695,7 +689,7 @@ void setup()
 
 	LOGLN(F("INIT SD CARD"));
 	if (!SD.begin(SD_CARD_CS_PIN)) {
-	LOGLNERR(F("SD INIT FAILED"));
+		LOGLNERR(F("SD INIT FAILED"));
 		return;
 	}
 
@@ -716,14 +710,14 @@ void setup()
 
 	generate_output_layer();
 	show_output_layer();
-	layer_write_to_serial(0);
+//	layer_write_to_serial(0);
 }
 
 void loop() {
 	return;
 	unsigned long currentMillis = millis();
 
-	if ((currentMillis - previousMillis) > animation_frame->frame_delay ) {
+	if ((currentMillis - previousMillis) > animation_frame->frame_delay) {
 
 		previousMillis = currentMillis;
 		Serial.println(animation_frame->frame_delay);
