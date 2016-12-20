@@ -90,27 +90,27 @@ byte* get_ptr(unsigned int _addr) {
 }
 
 //template funk for all other types
-//template<typename T>
-//void write_type_to_ram(const unsigned int _start_addr,const T _type)
-//{
-//	byte* byte_p = (byte*)(void*)&_type;
-//	for (size_t i = 0; i < sizeof(_type); i++)
-//	{
-//		write_byte_to_ram(_start_addr+i, *byte_p++);
-//	}
-//}
-////template funk for all other types
-//template<typename T>
-//void read_type_from_ram(const unsigned int _start_addr, T* _type)
-//{
-//
-//	byte* byte_p = (byte*)(void*)_type;
-//	for (size_t i = 0; i < sizeof(T); i++)
-//	{
-//		*byte_p++ = read_byte_from_ram(_start_addr + i);
-//	}
-//
-//}
+template<typename T>
+void write_type_to_ram(const unsigned int _start_addr,const T _type)
+{
+	byte* byte_p = (byte*)(void*)&_type;
+	for (size_t i = 0; i < sizeof(_type); i++) 
+	{
+		write_byte_to_ram(_start_addr+i, *byte_p++);
+	}
+}
+//template funk for all other types
+template<typename T> 
+T read_type_from_ram(const unsigned int _start_addr)
+{
+
+	byte* byte_p = (byte*)(void*)T;
+	for (size_t i = 0; i < sizeof(T); i++)
+	{
+		*byte_p++ = read_byte_from_ram(_start_addr + i);
+	}
+
+}
 
 #endif // !DEMO_RAM
 
@@ -232,8 +232,8 @@ struct ANIMATION_INFO_HEADER
 		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames), colors);
 		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors), rgb_mode);
 		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode), byte_size);
-		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size), data_offset);
-		write_byte_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size) + sizeof(data_offset), color_offset);
+		write_type_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size), data_offset);
+		write_type_to_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size) + sizeof(data_offset), color_offset);
 
 	}
 
@@ -244,8 +244,9 @@ struct ANIMATION_INFO_HEADER
 		colors = read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames));
 		rgb_mode = read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors));
 		byte_size = read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode));
-		data_offset = read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size));
-		color_offset = read_byte_from_ram(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size) + sizeof(data_offset));
+		//TODO FIX THIS
+		data_offset = read_type_from_ram<unsigned int>(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size));
+		color_offset = read_type_from_ram<unsigned int>(_start_addr + sizeof(frame_w) + sizeof(frame_h) + sizeof(frames) + sizeof(colors) + sizeof(rgb_mode) + sizeof(byte_size) + sizeof(data_offset));
 	}
 
 
@@ -468,6 +469,8 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 				//CALC THE POS FOR THE NEXT ANIMATION START
 				*_next_data_start = _animation_start_addr + tmp_anim_header.color_offset + tmp_anim_header.data_offset;
 				tmp_anim_header.print();
+				//WRITE TO RAM
+				tmp_anim_header.write_to_ram(_animation_start_addr);
 			}
 			//RESET COUNTERS AND SET FILEPOS TO START
 			was_info_header = true;
@@ -560,7 +563,7 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 			}
 			//WRITE HEADER
 			tmp_frame_header.print_header();
-			tmp_frame_header.write_to_ram(_animation_start_addr + current_frame_data_offset);
+			tmp_frame_header.write_to_ram(_animation_start_addr + current_color_data_offset);
 		}
 	}
 	myFile.close();
@@ -568,10 +571,22 @@ void write_sd_animation_to_sram(const char* _path, unsigned int* _next_data_star
 
 
 void read_frame_to_layer(unsigned int _frame_id, unsigned int _layer_id, unsigned int additional_offset = 0, SD_FRAME_HEADER* _head = nullptr) {
-	//Serial.println("----------------------------");
+	Serial.println("----------------------------");
 	SD_FRAME_HEADER tmp;
 	unsigned int  search_offset = additional_offset;
-	tmp.read_from_ram(search_offset);
+	
+	//ZUERST DEN MAIN ANIMATION HEADER LESEN
+	ANIMATION_INFO_HEADER anim_head;
+	anim_head.read_from_ram(additional_offset);
+	anim_head.print();
+	if (anim_head.frames < _frame_id) {
+		LOGLNERR("FRAME NOT IN ANIMATION SET (1st check)");
+	}
+	//DANN DEN ERSTEN FRAEM HEADER LESEN
+
+	//DANN UM DENN OFFSET WEITER GEHEN UND DEN NÄCHSTEN LESEN WENN GEFUNDEN DANN DATEN LESEN
+	
+	//tmp.read_from_ram(search_offset);
 	//tmp.print_header();
 
 	//SEARCH FOR OFFSET
