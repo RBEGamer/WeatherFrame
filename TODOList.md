@@ -11,13 +11,11 @@
 * port to esp
 * für dem ram eine usage table adden die angibt wie viele byte unangefasst sind
 * free methode hinzufügen ??
-* create main file header for size info -> Colortable + animation + offsets
-* load the colortable first but this can be anywhre in the file!!!!
+
 * extra debug func print to serial adden ink line and func name
-* check for line not _ -> FRAME_ !
 
+* READ WF_CONFIG.ini
 
-* FAME INFO MACHEN und dann einen FRAME DATA BLOCK mit FRAMEDATA_<id>_data0, dara1
 ## FRAME_BUILDER GUI
 
 <<<<<<< HEAD
