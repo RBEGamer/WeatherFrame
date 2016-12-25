@@ -17,7 +17,8 @@ For further build instructions,please see the pictures at `/images/
  * 64x WS2812 LEDs
  * 64x 3D Printed single_frame.stl Parts
  * Nodemcu V3 or an ohter ESP2866 Board
- * 23K256 or 23LC1024 SRAM IC
+ * 23K256 SRAM IC
+ * 24LC32 I2C EEprom
  * Levelshifter 3.3V -> 5V 4 channel
  * SD Card breakooutboard
  * Some Wooden parts for the Frame
