@@ -93,10 +93,9 @@ byte* get_ptr(unsigned int _addr) {
 template<typename T>
 void write_type_to_ram(const unsigned int _start_addr,const T _type)
 {
-	byte* byte_p = (byte*)(void*)&_type;
-	for (size_t i = 0; i < sizeof(_type); i++) 
+	for (size_t i = 0; i < sizeof(_type); ++i) 
 	{
-		write_byte_to_ram(_start_addr+i, *byte_p++);
+		write_byte_to_ram(_start_addr+i, *((byte*)&_type +i));
 	}
 }
 //template funk for all other types
@@ -584,7 +583,7 @@ void read_frame_to_layer(unsigned int _frame_id, unsigned int _layer_id, unsigne
 	}
 	//DANN DEN ERSTEN FRAEM HEADER LESEN
 
-	//DANN UM DENN OFFSET WEITER GEHEN UND DEN NÄCHSTEN LESEN WENN GEFUNDEN DANN DATEN LESEN
+	//DANN UM DENN OFFSET WEITER GEHEN UND DEN NÃ„CHSTEN LESEN WENN GEFUNDEN DANN DATEN LESEN
 	
 	//tmp.read_from_ram(search_offset);
 	//tmp.print_header();
